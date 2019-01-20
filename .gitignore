@@ -1,0 +1,32 @@
+# Ignore bundler config
+/.bundle
+
+# Ignore the default SQLite database.
+/db/*.sqlite3
+
+# Ignore all logfiles and tempfiles.
+/log/*.log
+/tmp
+
+/data/*.csv
+/data/*.dat
+submissions
+external_submissions
+reports
+backbone
+*.gem
+*.rbc
+.bundle
+*.bundle
+.config
+coverage
+InstalledFiles
+lib/bundler/man
+pkg
+rdoc
+debug
+spec/reports
+test/tmp
+test/version_tmp
+tmp
+.DS_Store

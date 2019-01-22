@@ -31,4 +31,8 @@ void euclidean_nodes__deep_copy( EuclideanNodes *euclidean_nodes_copy, Euclidean
 
 EuclideanNodes * euclidean_nodes__clone( EuclideanNodes *euclidean_nodes_orig );
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+double euclidean_nodes__distance_between( void *nodes_addr, int node_a_id, int node_b_id );
+
 #endif

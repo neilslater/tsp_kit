@@ -2,10 +2,10 @@ require 'helpers'
 
 describe TspKit::Nodes::Euclidean do
   # We only do 2D for now, but the data structure can support more dimensions
-  describe "2D" do
+  describe "class methods" do
     describe "#new" do
       it "creates an object of the correct type" do
-        expect( TspKit::Nodes::Euclidean.new(10, 2) ).to be_a TspKit::Nodes::Euclidean
+        expect( TspKit::Nodes::Euclidean.new(10, 3) ).to be_a TspKit::Nodes::Euclidean
       end
 
       it "does not create anything if number of nodes is out of bounds" do
@@ -21,10 +21,10 @@ describe TspKit::Nodes::Euclidean do
       end
 
       it "creates a default locations array" do
-        nodes = TspKit::Nodes::Euclidean.new( 10, 2 )
+        nodes = TspKit::Nodes::Euclidean.new( 10, 4 )
         locations = nodes.locations
         expect( locations ).to be_a NArray
-        expect( locations.shape ).to eql [2, 10]
+        expect( locations.shape ).to eql [4, 10]
       end
     end
 
@@ -60,6 +60,40 @@ describe TspKit::Nodes::Euclidean do
         expect( nodes.num_nodes ).to eql 3
         expect( nodes.num_dims ).to eql 2
         expect( nodes.locations[0..1, 1].to_a ).to eql [25.0, 15.0]
+      end
+    end
+  end
+
+  describe "instance methods" do
+    let( :test_filename ) { File.join(__dir__, 'test_euclidean_nodes_01.dat') }
+    subject { TspKit::Nodes::Euclidean.load( test_filename ) }
+
+    describe "#clone" do
+      it "copies everything" do
+        copy = subject.clone
+        expect( copy.num_nodes ).to eql subject.num_nodes
+        expect( copy.num_dims ).to eql subject.num_dims
+        expect( copy.locations.to_a ).to eql subject.locations.to_a
+      end
+
+      it "makes a deep copy of locations" do
+        copy = subject.clone
+        expect( copy.locations ).to_not be subject.locations
+      end
+    end
+
+    describe "#distance_between" do
+      subject { TspKit::Nodes::Euclidean.new(10,2) }
+
+      before :each do
+        NArray.srand(12324124)
+        subject.random!
+      end
+
+      it "returns 0.0 for distance between node and itself" do
+        [*0..9].each do |id|
+          expect( subject.distance_between( id, id ) ).to eql 0.0
+        end
       end
     end
   end

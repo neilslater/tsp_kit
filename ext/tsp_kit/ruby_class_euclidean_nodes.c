@@ -39,7 +39,7 @@ void assert_value_wraps_euclidean_nodes( VALUE obj ) {
 //
 
 /* @overload initialize( num_nodes, num_dims )
- * Creates a new ...
+ * Creates a new TspKit::Nodes::Euclidean
  * @param [Integer] num_nodes ...
  * @param [Integer] num_dims ...
  * @return [TspKit::Nodes::Euclidean] new ...
@@ -53,8 +53,8 @@ VALUE euclidean_nodes_rbobject__initialize( VALUE self, VALUE rv_num_nodes, VALU
   }
 
   num_dims = NUM2INT( rv_num_dims );
-  if (num_dims < 2 || num_dims > 2) {
-    rb_raise(rb_eArgError, "num_dims %d is outside accepted range 2..2", num_dims);
+  if (num_dims < 2 || num_dims > 10) {
+    rb_raise(rb_eArgError, "num_dims %d is outside accepted range 2..10", num_dims);
   }
 
   euclidean_nodes__init( euclidean_nodes, num_nodes, num_dims );
@@ -130,8 +130,8 @@ VALUE euclidean_nodes_rbclass__from_data( VALUE self, VALUE rv_locations) {
     rb_raise(rb_eArgError, "num_nodes %d is outside accepted range 3..10000000", num_nodes);
   }
 
-  if (num_dims < 2 || num_dims > 2) {
-    rb_raise(rb_eArgError, "num_dims %d is outside accepted range 2..2", num_dims);
+  if (num_dims < 2 || num_dims > 10) {
+    rb_raise(rb_eArgError, "num_dims %d is outside accepted range 2..10", num_dims);
   }
 
   rv_nodes = euclidean_nodes_alloc( TspKit_EuclideanNodes );
@@ -146,6 +146,28 @@ VALUE euclidean_nodes_rbclass__from_data( VALUE self, VALUE rv_locations) {
   return rv_nodes;
 }
 
+/* @overload distance_between( node_a_id, node_b_id )
+ * Creates a new TspKit::Nodes::Euclidean
+ * @param [Integer] node_a_id first node
+ * @param [Integer] node_b_id second node
+ * @return [Float] distance between identified nodes
+ */
+VALUE euclidean_nodes_rbobject__distance_between( VALUE self, VALUE rv_node_a_id, VALUE rv_node_b_id ) {
+  int node_a_id, node_b_id;
+  EuclideanNodes *euclidean_nodes = get_euclidean_nodes_struct( self );
+
+  node_a_id = NUM2INT( rv_node_a_id );
+  if (node_a_id < 0 || node_a_id >= euclidean_nodes->num_nodes) {
+    rb_raise(rb_eArgError, "node_a_id %d is outside accepted range 0..%d", node_a_id, euclidean_nodes->num_nodes-1);
+  }
+
+  node_b_id = NUM2INT( rv_node_b_id );
+  if (node_b_id < 0 || node_b_id >= euclidean_nodes->num_nodes) {
+    rb_raise(rb_eArgError, "node_b_id %d is outside accepted range 0..%d", node_b_id, euclidean_nodes->num_nodes-1);
+  }
+
+  return DBL2NUM( euclidean_nodes__distance_between( euclidean_nodes, node_a_id, node_b_id ) );
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -160,4 +182,7 @@ void init_euclidean_nodes_class( ) {
   rb_define_method( TspKit_EuclideanNodes, "num_nodes", euclidean_nodes_rbobject__get_num_nodes, 0 );
   rb_define_method( TspKit_EuclideanNodes, "num_dims", euclidean_nodes_rbobject__get_num_dims, 0 );
   rb_define_method( TspKit_EuclideanNodes, "locations", euclidean_nodes_rbobject__get_narr_locations, 0 );
+
+  // EuclideanNodes methods
+  rb_define_method( TspKit_EuclideanNodes, "distance_between", euclidean_nodes_rbobject__distance_between, 2 );
 }

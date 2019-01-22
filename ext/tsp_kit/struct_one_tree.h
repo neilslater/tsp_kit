@@ -8,7 +8,7 @@
 #ifndef STRUCT_ONE_TREE_H
 #define STRUCT_ONE_TREE_H
 
-#define DBL_MAX 1.7976931348623156E+308
+#include <float.h>
 
 #include <ruby.h>
 #include "narray.h"
@@ -42,6 +42,6 @@ void one_tree__gc_mark( OneTree *one_tree );
 
 void one_tree__deep_copy( OneTree *one_tree_copy, OneTree *one_tree_orig );
 
-OneTree * one_tree__clone( OneTree *one_tree_orig );
+OneTree *one_tree__clone( OneTree *one_tree_orig );
 
 #endif

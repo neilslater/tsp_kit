@@ -43,4 +43,50 @@ describe TspKit do
       end
     end
   end
+
+  describe ".randn" do
+    it "generates sequences from normal distribution" do
+      inputs = [
+        [     0, [  2.051102,  1.353689, -0.978547,  1.454275, -1.338440,  1.661093, -1.429422,  2.040621,  0.284341] ],
+        [   830, [  0.200539,  0.212403,  1.209253,  0.216380, -0.912048, -1.794705, -0.394491,  1.156624] ],
+        [  7685, [ -0.984045,  0.159842,  0.587212,  0.008777, -1.644188, -0.253400, -2.566122, -1.663499,  0.493266] ],
+        [  7684, [ 0.944384,  0.057058,  0.068674,  1.035382, -0.436135, -1.138316, -1.003699, -0.133672] ],
+      ]
+
+      inputs.each do |seed, expected_results|
+        TspKit.srand( seed )
+        got_results = expected_results.map { |e| TspKit.randn }
+        got_results.zip( expected_results ).each do |got_val, expected_val|
+          expect( got_val ).to be_within(1e-6).of expected_val
+        end
+      end
+    end
+  end
+
+  describe ".shuffle_narray" do
+    it "shuffles numbers consistently when seeded" do
+      inputs = [
+        [     0, [5, 7, 0, 6, 8, 3, 1, 9, 4, 2] ],
+        [   830, [1, 5, 6, 0, 7, 9, 3, 2, 8, 4] ],
+        [  7685, [4, 1, 2, 5, 0, 9, 3, 6, 8, 7] ],
+        [  7684, [7, 3, 9, 0, 2, 1, 8, 5, 6, 4] ],
+      ]
+
+      inputs.each do |seed, expected_results|
+        TspKit.srand( seed )
+        narray = NArray[*0..9]
+        TspKit.shuffle_narray(narray)
+        expect(narray.to_a).to eql expected_results
+      end
+    end
+
+    it "can shuffle a large array" do
+      TspKit.srand( 1234621 )
+      narray = NArray.int(200000).indgen!
+      TspKit.shuffle_narray(narray)
+      expect(narray[500..519].to_a).to eql [37544, 132336, 13460, 78671, 46310, 44317, 126946,
+                                            113401, 45819, 56437, 69486, 18315, 20744, 172846,
+                                            54965, 82657, 70511, 5599, 44508, 27858]
+    end
+  end
 end

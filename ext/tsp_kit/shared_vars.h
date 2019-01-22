@@ -14,7 +14,9 @@
 #endif
 
 extern VALUE TspKit;
+extern VALUE TspKit_Nodes;
 extern VALUE TspKit_EuclideanNodes;
+
 extern VALUE TspKit_WeightMatrix;
 extern VALUE TspKit_DistanceRank;
 extern VALUE TspKit_Solution;

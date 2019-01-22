@@ -62,5 +62,7 @@ long genrand_int31(void);
 void init_srand_by_time();
 float genrand_norm(void);
 double genrand_norm_dbl(void);
+int random_int_up_to(int max_int);
+int half_norm_int(float sd);
 
 #endif

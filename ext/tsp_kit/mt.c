@@ -46,13 +46,20 @@
 */
 
 #include "mt.h"
+#include <stdbool.h>
 
 static unsigned long mt[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 
+static bool generate;
+static bool generate_f;
+
 /* initializes mt[N] with a seed */
 void init_genrand(unsigned long s)
 {
+    generate = false;
+    generate_f = false;
+
     mt[0]= s & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {
         mt[mti] =
@@ -73,6 +80,8 @@ void init_genrand(unsigned long s)
 void init_by_array(unsigned long init_key[], int key_length)
 {
     int i, j, k;
+    generate = false;
+    generate_f = false;
     init_genrand(19650218UL);
     i=1; j=0;
     k = (N>key_length ? N : key_length);
@@ -147,18 +156,6 @@ float genrand_real1(void)
     + (0.5 + 0.5/4294967295.0);
 }
 
-/* generates a random number from normal distribution with SD 1 */
-float genrand_norm(void)
-{
-    float n1 = genrand_real1();
-    float n2 = genrand_real1();
-
-    // Box-Muller transform (well, half of it)
-    if ( n1 < 1e-50 ) n1 = 1e-50;
-    n1 = -2 * log( n1 );
-    return sqrt( n1 ) * cos( n2 * 6.2831853071795 );
-}
-
 /* generates a random number on [0,1) with 53-bit resolution */
 double genrand_res53(void)
 {
@@ -169,15 +166,52 @@ double genrand_res53(void)
 }
 
 /* generates a random number from normal distribution with SD 1 */
-double genrand_norm_dbl(void)
-{
-    double n1 = genrand_res53();
-    double n2 = genrand_res53();
+// From Wikipedia: https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+float genrand_norm(void) {
+    static const float two_pi_f = 2.0*3.14159265358979323846;
+    static float z1_f;
+    float u1, u2, z0_f;
 
-    // Box-Muller transform (well, half of it)
-    if ( n1 < 1e-100 ) n1 = 1e-100;
-    n1 = -2 * log( n1 );
-    return sqrt( n1 ) * cos( n2 * 6.2831853071795 );
+    generate_f = !generate_f;
+    if (!generate_f)
+       return z1_f;
+
+    u1 = genrand_real1();
+    u2 = genrand_real1();
+    if ( u1 < 1e-20 ) u1 = 1e-20;
+
+    z0_f = sqrtf(-2.0 * logf(u1)) * cosf(two_pi_f * u2);
+    z1_f = sqrtf(-2.0 * logf(u1)) * sinf(two_pi_f * u2);
+    return z0_f;
+}
+
+/* generates a random number from normal distribution with SD 1 */
+// From Wikipedia: https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+double genrand_norm_dbl(void) {
+    static const double two_pi = 2.0*3.14159265358979323846;
+    static double z1;
+    double u1, u2, z0;
+
+    generate = !generate;
+    if (!generate)
+       return z1;
+
+    u1 = genrand_res53();
+    u2 = genrand_res53();
+    if ( u1 < 1e-100 ) u1 = 1e-100;
+
+    z0 = sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
+    z1 = sqrt(-2.0 * log(u1)) * sin(two_pi * u2);
+    return z0;
+}
+
+// For large ints, over ~ 10,000,000 this naive approach starts to get measurably biased.
+int random_int_up_to(int max_int) {
+  return genrand_int32() % max_int;
+}
+
+int half_norm_int(float sd) {
+  return (int) roundf(fabs(genrand_norm() * sd));
 }
 
 void init_srand_by_time() {

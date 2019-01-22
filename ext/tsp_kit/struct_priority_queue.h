@@ -8,9 +8,8 @@
 #ifndef STRUCT_PRIORITY_QUEUE_H
 #define STRUCT_PRIORITY_QUEUE_H
 
-#define DBL_MAX 1.7976931348623156E+308
-
 #include <ruby.h>
+#include <float.h>
 #include "narray.h"
 
 typedef struct _priority_queue_raw {

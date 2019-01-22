@@ -65,6 +65,6 @@ class TspKit::Nodes::Euclidean
   # @param [Hash] h Keys are :locations
   # @return [TspKit::Nodes::Euclidean] new object
   def self.from_h h
-    Santa2018::Cities.from_data( h[:locations] )
+    TspKit::Nodes::Euclidean.from_data( h[:locations] )
   end
 end

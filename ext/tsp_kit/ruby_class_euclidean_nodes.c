@@ -42,19 +42,29 @@ void assert_value_wraps_euclidean_nodes( VALUE obj ) {
  * Creates a new ...
  * @param [Integer] num_nodes ...
  * @param [Integer] num_dims ...
- * @return [TspKit::EuclideanNodes] new ...
+ * @return [TspKit::Nodes::Euclidean] new ...
  */
 VALUE euclidean_nodes_rbobject__initialize( VALUE self, VALUE rv_num_nodes, VALUE rv_num_dims ) {
+  int num_nodes, num_dims;
   EuclideanNodes *euclidean_nodes = get_euclidean_nodes_struct( self );
+  num_nodes = NUM2INT( rv_num_nodes );
+  if (num_nodes < 3 || num_nodes > 10000000) {
+    rb_raise(rb_eArgError, "num_nodes %d is outside accepted range 3..10000000", num_nodes);
+  }
 
-  euclidean_nodes__init( euclidean_nodes, NUM2INT( rv_num_nodes ), NUM2INT( rv_num_dims ) );
+  num_dims = NUM2INT( rv_num_dims );
+  if (num_dims < 2 || num_dims > 2) {
+    rb_raise(rb_eArgError, "num_dims %d is outside accepted range 2..2", num_dims);
+  }
+
+  euclidean_nodes__init( euclidean_nodes, num_nodes, num_dims );
 
   return self;
 }
 
 /* @overload clone
- * When cloned, the returned EuclideanNodes has deep copies of C data.
- * @return [TspKit::EuclideanNodes] new
+ * When cloned, the returned object has deep copies of all internal data.
+ * @return [TspKit::Nodes::Euclidean] copy
  */
 VALUE euclidean_nodes_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
   EuclideanNodes *euclidean_nodes_copy;
@@ -70,7 +80,7 @@ VALUE euclidean_nodes_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
 }
 
 /* @!attribute [r] num_nodes
- * Description goes here
+ * Number of nodes described by this collection, from 3 to 10000000.
  * @return [Integer]
  */
 VALUE euclidean_nodes_rbobject__get_num_nodes( VALUE self ) {
@@ -79,7 +89,7 @@ VALUE euclidean_nodes_rbobject__get_num_nodes( VALUE self ) {
 }
 
 /* @!attribute [r] num_dims
- * Description goes here
+ * Number of spatial dimensions in the problem, from 2 to 2 (more later!)
  * @return [Integer]
  */
 VALUE euclidean_nodes_rbobject__get_num_dims( VALUE self ) {
@@ -96,6 +106,47 @@ VALUE euclidean_nodes_rbobject__get_narr_locations( VALUE self ) {
   return euclidean_nodes->narr_locations;
 }
 
+/* @overload from_data( locations )
+ * Creates new TspKit::Nodes::Euclidean object directly from NArray of locations
+ *
+ * @return [TspKit::Nodes::Euclideans] new instance
+ */
+VALUE euclidean_nodes_rbclass__from_data( VALUE self, VALUE rv_locations) {
+  struct NARRAY *narr;
+  int num_nodes, num_dims;
+  VALUE rv_nodes;
+  EuclideanNodes *nodes;
+
+  rv_locations = na_cast_object(rv_locations, NA_DFLOAT);
+  GetNArray( rv_locations, narr );
+  if (narr->rank != 2) {
+    rb_raise(rb_eArgError, "locations array should have rank 2, but is rank %d", narr->rank);
+  }
+
+  num_dims = narr->shape[0];
+  num_nodes = narr->shape[1];
+
+  if (num_nodes < 3 || num_nodes > 10000000) {
+    rb_raise(rb_eArgError, "num_nodes %d is outside accepted range 3..10000000", num_nodes);
+  }
+
+  if (num_dims < 2 || num_dims > 2) {
+    rb_raise(rb_eArgError, "num_dims %d is outside accepted range 2..2", num_dims);
+  }
+
+  rv_nodes = euclidean_nodes_alloc( TspKit_EuclideanNodes );
+  nodes = get_euclidean_nodes_struct( rv_nodes );
+  nodes->num_nodes = num_nodes;
+  nodes->num_dims = num_dims;
+  nodes->narr_locations = rv_locations;
+  nodes->locations = (double *) narr->ptr;
+  nodes->locations_shape = ALLOC_N( int, 2 );
+  nodes->locations_shape[0] = num_dims;
+  nodes->locations_shape[1] = num_nodes;
+  return rv_nodes;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void init_euclidean_nodes_class( ) {
@@ -103,6 +154,7 @@ void init_euclidean_nodes_class( ) {
   rb_define_alloc_func( TspKit_EuclideanNodes, euclidean_nodes_alloc );
   rb_define_method( TspKit_EuclideanNodes, "initialize", euclidean_nodes_rbobject__initialize, 2 );
   rb_define_method( TspKit_EuclideanNodes, "initialize_copy", euclidean_nodes_rbobject__initialize_copy, 1 );
+  rb_define_singleton_method( TspKit_EuclideanNodes, "from_data", euclidean_nodes_rbclass__from_data, 1 );
 
   // EuclideanNodes attributes
   rb_define_method( TspKit_EuclideanNodes, "num_nodes", euclidean_nodes_rbobject__get_num_nodes, 0 );

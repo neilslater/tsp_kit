@@ -1,0 +1,4 @@
+TspKit::Nodes interface:
+  random_locations!( scale_factor )
+  distance_between( n1, n2 ) - also export internally
+  all_distances_from( n1 ) - also export internally

@@ -18,6 +18,8 @@ void shuffle_ints( int n, int *array );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef double (*DISTANCEFN)(void*,int,int);
+typedef double (*DISTANCEFN)(void*, int, int);
+
+typedef void (*DISTANCEARRAYFN)(void*, int, double*);
 
 #endif

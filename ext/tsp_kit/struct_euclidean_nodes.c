@@ -90,3 +90,23 @@ double euclidean_nodes__distance_between( void *nodes_addr, int node_a_id, int n
 
   return sqrt(d2);
 }
+
+void euclidean_nodes__all_distances_from( void *nodes_addr, int node_id, double *distances_buffer ) {
+  EuclideanNodes *nodes = (EuclideanNodes *) nodes_addr;
+  int numn = nodes->num_nodes;
+  int numd = nodes->num_dims;
+  double *loc = nodes->locations;
+  int node_a_offset = numd * node_id;
+
+  for( int j = 0; j < numn; j++ ) {
+    double d2 = 0.0;
+    int node_b_offset = numd * j;
+    for( int i = 0; i < numd; i++ ) {
+      double dx = loc[i + node_a_offset] - loc[i + node_b_offset];
+      d2 += dx * dx;
+    }
+    distances_buffer[j] = sqrt(d2);
+  }
+
+  return;
+}

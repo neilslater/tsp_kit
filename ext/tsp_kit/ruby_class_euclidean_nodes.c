@@ -147,7 +147,7 @@ VALUE euclidean_nodes_rbclass__from_data( VALUE self, VALUE rv_locations) {
 }
 
 /* @overload distance_between( node_a_id, node_b_id )
- * Creates a new TspKit::Nodes::Euclidean
+ * Returns distance metric between two nodes.
  * @param [Integer] node_a_id first node
  * @param [Integer] node_b_id second node
  * @return [Float] distance between identified nodes
@@ -169,6 +169,30 @@ VALUE euclidean_nodes_rbobject__distance_between( VALUE self, VALUE rv_node_a_id
   return DBL2NUM( euclidean_nodes__distance_between( euclidean_nodes, node_a_id, node_b_id ) );
 }
 
+/* @overload all_distances_from( node_id )
+ * Returns distance metric from one node to all other nodes.
+ * @param [Integer] node_id node to measure from
+ * @return [NArray] all distances from given node, indexed by destination node_id
+ */
+VALUE euclidean_nodes_rbobject__all_distances_from( VALUE self, VALUE rv_node_id ) {
+  int node_id;
+  VALUE rv_result;
+  struct NARRAY *narr;
+  int shape[1] = { 0 };
+  EuclideanNodes *euclidean_nodes = get_euclidean_nodes_struct( self );
+
+  node_id = NUM2INT( rv_node_id );
+  if (node_id < 0 || node_id >= euclidean_nodes->num_nodes) {
+    rb_raise(rb_eArgError, "node_id %d is outside accepted range 0..%d", node_id, euclidean_nodes->num_nodes-1);
+  }
+
+  shape[0] = euclidean_nodes->num_nodes;
+  rv_result = na_make_object( NA_DFLOAT, 1, shape, cNArray );
+  GetNArray( rv_result, narr );
+  euclidean_nodes__all_distances_from( euclidean_nodes, node_id, (double*) narr->ptr );
+  return rv_result;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void init_euclidean_nodes_class( ) {
@@ -185,4 +209,5 @@ void init_euclidean_nodes_class( ) {
 
   // EuclideanNodes methods
   rb_define_method( TspKit_EuclideanNodes, "distance_between", euclidean_nodes_rbobject__distance_between, 2 );
+  rb_define_method( TspKit_EuclideanNodes, "all_distances_from", euclidean_nodes_rbobject__all_distances_from, 1 );
 }

@@ -35,4 +35,6 @@ EuclideanNodes * euclidean_nodes__clone( EuclideanNodes *euclidean_nodes_orig );
 
 double euclidean_nodes__distance_between( void *nodes_addr, int node_a_id, int node_b_id );
 
+void euclidean_nodes__all_distances_from( void *nodes_addr, int node_id, double *distances_buffer );
+
 #endif

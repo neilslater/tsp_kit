@@ -1,4 +1,23 @@
-TspKit::Nodes interface:
-  random_locations!( scale_factor )
-  distance_between( n1, n2 ) - also export internally
-  all_distances_from( n1 ) - also export internally
+ * TspKit::Nodes::WeightMatrix, and method to generate it from TspKit::Nodes::Euclidean (optional)
+  * Input TspKit::Nodes::<OTHER>, output TspKit::Nodes::WeightMatrix, max num_nodes for this
+
+ * TspKit::DistanceRank and method to generate from any TspKit::Nodes subclass
+  * Input TspKit::Nodes, output TspKit::DistanceRank
+
+ * TspKit::SubGraph and method to generate from any TspKit::DistanceRank
+  * Input TspKit::DistanceRank, output TspKit::SubGraph (which is really just a TspKit::DistanceRank?)
+
+ * TspKit::OneTree and generate from any TspKit::Nodes and/or TspKit::SubGraph
+  * Input TspKit::Nodes, TspKit::SubGraph (optional), output TspKit::OneTree
+
+ * "ascent" of TspKit::OneTree
+  * Input TspKit::Nodes, TspKit::SubGraph (optional), output TspKit::OneTree
+
+ * alpha metric generation from TspKit::OneTree
+  * Input TspKit::Nodes, TspKit::OneTree, output TspKit::DistanceRank
+
+ * TspKit::Solution class, and scoring
+
+ * TspKit::Solver::Greedy
+  * Input TspKit::Nodes, TspKit::DistanceRank, output TspKit::Solution
+

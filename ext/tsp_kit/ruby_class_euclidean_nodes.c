@@ -8,7 +8,7 @@
 //  struct_euclidean_nodes.c
 //
 
-inline VALUE euclidean_nodes_as_ruby_class( EuclideanNodes *euclidean_nodes , VALUE klass ) {
+VALUE euclidean_nodes_as_ruby_class( EuclideanNodes *euclidean_nodes , VALUE klass ) {
   return Data_Wrap_Struct( klass, euclidean_nodes__gc_mark, euclidean_nodes__destroy, euclidean_nodes );
 }
 
@@ -16,7 +16,7 @@ VALUE euclidean_nodes_alloc(VALUE klass) {
   return euclidean_nodes_as_ruby_class( euclidean_nodes__create(), klass );
 }
 
-inline EuclideanNodes *get_euclidean_nodes_struct( VALUE obj ) {
+EuclideanNodes *get_euclidean_nodes_struct( VALUE obj ) {
   EuclideanNodes *euclidean_nodes;
   Data_Get_Struct( obj, EuclideanNodes, euclidean_nodes );
   return euclidean_nodes;

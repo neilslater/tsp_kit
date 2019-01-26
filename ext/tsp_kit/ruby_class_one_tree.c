@@ -8,7 +8,7 @@
 //  struct_one_tree.c
 //
 
-inline VALUE one_tree_as_ruby_class( OneTree *one_tree , VALUE klass ) {
+VALUE one_tree_as_ruby_class( OneTree *one_tree , VALUE klass ) {
   return Data_Wrap_Struct( klass, one_tree__gc_mark, one_tree__destroy, one_tree );
 }
 
@@ -16,7 +16,7 @@ VALUE one_tree_alloc(VALUE klass) {
   return one_tree_as_ruby_class( one_tree__create(), klass );
 }
 
-inline OneTree *get_one_tree_struct( VALUE obj ) {
+OneTree *get_one_tree_struct( VALUE obj ) {
   OneTree *one_tree;
   Data_Get_Struct( obj, OneTree, one_tree );
   return one_tree;

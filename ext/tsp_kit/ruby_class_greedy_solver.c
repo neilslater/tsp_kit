@@ -8,7 +8,7 @@
 //  struct_greedy_solver.c
 //
 
-inline VALUE greedy_solver_as_ruby_class( GreedySolver *greedy_solver , VALUE klass ) {
+VALUE greedy_solver_as_ruby_class( GreedySolver *greedy_solver , VALUE klass ) {
   return Data_Wrap_Struct( klass, greedy_solver__gc_mark, greedy_solver__destroy, greedy_solver );
 }
 
@@ -16,7 +16,7 @@ VALUE greedy_solver_alloc(VALUE klass) {
   return greedy_solver_as_ruby_class( greedy_solver__create(), klass );
 }
 
-inline GreedySolver *get_greedy_solver_struct( VALUE obj ) {
+GreedySolver *get_greedy_solver_struct( VALUE obj ) {
   GreedySolver *greedy_solver;
   Data_Get_Struct( obj, GreedySolver, greedy_solver );
   return greedy_solver;

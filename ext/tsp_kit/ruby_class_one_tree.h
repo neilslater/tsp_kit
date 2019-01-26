@@ -10,4 +10,12 @@
 
 void init_one_tree_class( );
 
+VALUE one_tree_as_ruby_class( OneTree *one_tree , VALUE klass );
+
+VALUE one_tree_alloc( VALUE klass );
+
+OneTree *get_one_tree_struct( VALUE obj );
+
+void assert_value_wraps_one_tree( VALUE obj );
+
 #endif

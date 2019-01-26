@@ -8,7 +8,7 @@
 //  struct_priority_queue.c
 //
 
-inline VALUE priority_queue_as_ruby_class( PriorityQueue *priority_queue , VALUE klass ) {
+VALUE priority_queue_as_ruby_class( PriorityQueue *priority_queue , VALUE klass ) {
   return Data_Wrap_Struct( klass, priority_queue__gc_mark, priority_queue__destroy, priority_queue );
 }
 
@@ -16,7 +16,7 @@ VALUE priority_queue_alloc(VALUE klass) {
   return priority_queue_as_ruby_class( priority_queue__create(), klass );
 }
 
-inline PriorityQueue *get_priority_queue_struct( VALUE obj ) {
+PriorityQueue *get_priority_queue_struct( VALUE obj ) {
   PriorityQueue *priority_queue;
   Data_Get_Struct( obj, PriorityQueue, priority_queue );
   return priority_queue;

@@ -8,7 +8,7 @@
 //  struct_distance_rank.c
 //
 
-inline VALUE distance_rank_as_ruby_class( DistanceRank *distance_rank , VALUE klass ) {
+VALUE distance_rank_as_ruby_class( DistanceRank *distance_rank , VALUE klass ) {
   return Data_Wrap_Struct( klass, distance_rank__gc_mark, distance_rank__destroy, distance_rank );
 }
 
@@ -16,7 +16,7 @@ VALUE distance_rank_alloc(VALUE klass) {
   return distance_rank_as_ruby_class( distance_rank__create(), klass );
 }
 
-inline DistanceRank *get_distance_rank_struct( VALUE obj ) {
+DistanceRank *get_distance_rank_struct( VALUE obj ) {
   DistanceRank *distance_rank;
   Data_Get_Struct( obj, DistanceRank, distance_rank );
   return distance_rank;

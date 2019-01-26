@@ -10,4 +10,12 @@
 
 void init_weight_matrix_class( );
 
+VALUE weight_matrix_as_ruby_class( WeightMatrix *weight_matrix , VALUE klass );
+
+VALUE weight_matrix_alloc( VALUE klass );
+
+WeightMatrix *get_weight_matrix_struct( VALUE obj );
+
+void assert_value_wraps_weight_matrix( VALUE obj );
+
 #endif

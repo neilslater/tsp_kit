@@ -8,7 +8,7 @@
 //  struct_solution.c
 //
 
-inline VALUE solution_as_ruby_class( Solution *solution , VALUE klass ) {
+VALUE solution_as_ruby_class( Solution *solution , VALUE klass ) {
   return Data_Wrap_Struct( klass, solution__gc_mark, solution__destroy, solution );
 }
 
@@ -16,7 +16,7 @@ VALUE solution_alloc(VALUE klass) {
   return solution_as_ruby_class( solution__create(), klass );
 }
 
-inline Solution *get_solution_struct( VALUE obj ) {
+Solution *get_solution_struct( VALUE obj ) {
   Solution *solution;
   Data_Get_Struct( obj, Solution, solution );
   return solution;

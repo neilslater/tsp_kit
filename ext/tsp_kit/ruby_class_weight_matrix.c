@@ -8,7 +8,7 @@
 //  struct_weight_matrix.c
 //
 
-inline VALUE weight_matrix_as_ruby_class( WeightMatrix *weight_matrix , VALUE klass ) {
+VALUE weight_matrix_as_ruby_class( WeightMatrix *weight_matrix , VALUE klass ) {
   return Data_Wrap_Struct( klass, weight_matrix__gc_mark, weight_matrix__destroy, weight_matrix );
 }
 
@@ -16,7 +16,7 @@ VALUE weight_matrix_alloc(VALUE klass) {
   return weight_matrix_as_ruby_class( weight_matrix__create(), klass );
 }
 
-inline WeightMatrix *get_weight_matrix_struct( VALUE obj ) {
+WeightMatrix *get_weight_matrix_struct( VALUE obj ) {
   WeightMatrix *weight_matrix;
   Data_Get_Struct( obj, WeightMatrix, weight_matrix );
   return weight_matrix;

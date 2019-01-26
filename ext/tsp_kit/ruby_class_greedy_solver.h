@@ -10,4 +10,12 @@
 
 void init_greedy_solver_class( );
 
+VALUE greedy_solver_as_ruby_class( GreedySolver *greedy_solver , VALUE klass );
+
+VALUE greedy_solver_alloc( VALUE klass );
+
+GreedySolver *get_greedy_solver_struct( VALUE obj );
+
+void assert_value_wraps_greedy_solver( VALUE obj );
+
 #endif

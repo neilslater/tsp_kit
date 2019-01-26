@@ -23,4 +23,8 @@ if /cygwin|mingw/ =~ RUBY_PLATFORM
    have_library("narray") || raise("ERROR: narray library is not found")
 end
 
-create_makefile( 'tsp_kit/tsp_kit' )
+makefile_config = RbConfig::MAKEFILE_CONFIG
+makefile_config["CC"] = ENV["CC"] if ENV["CC"]
+makefile_config["CFLAGS"] << " -std=c99"
+
+with_cflags(makefile_config["CFLAGS"]) { create_makefile( 'tsp_kit/tsp_kit' ) }

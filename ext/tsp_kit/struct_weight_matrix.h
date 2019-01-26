@@ -10,6 +10,7 @@
 
 #include <ruby.h>
 #include "narray.h"
+#include <stdbool.h>
 
 typedef struct _weight_matrix_raw {
   int num_nodes;
@@ -29,5 +30,13 @@ void weight_matrix__gc_mark( WeightMatrix *weight_matrix );
 void weight_matrix__deep_copy( WeightMatrix *weight_matrix_copy, WeightMatrix *weight_matrix_orig );
 
 WeightMatrix * weight_matrix__clone( WeightMatrix *weight_matrix_orig );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool weight_matrix__validate( WeightMatrix *weight_matrix );
+
+double weight_matrix__distance_between( void *nodes_addr, int node_a_id, int node_b_id );
+
+void weight_matrix__all_distances_from( void *nodes_addr, int node_id, double *distances_buffer );
 
 #endif

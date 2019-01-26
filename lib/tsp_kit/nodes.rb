@@ -19,3 +19,17 @@ class TspKit::Nodes::Euclidean
     locations.random!.mul!(sizes).add!(offsets)
   end
 end
+
+class TspKit::Nodes::WeightMatrix
+  # Randomises the weights matrix, useful for tests and random challenges. Note this uses NArray's random
+  # so use NArray.srand to set seed values for repeat tests.
+  # @param [max] limits defaults to 100.0
+  # @return [NArray] altered locations table
+  def random! max = 100.0
+    weights.random!.mul!(max/2)
+    weights.add!( weights.transpose(1,0) )
+    [*0...num_nodes].each { |i| weights[i, i] = 0.0 }
+    validate
+    weights
+  end
+end

@@ -68,3 +68,22 @@ class TspKit::Nodes::Euclidean
     TspKit::Nodes::Euclidean.from_data( h[:locations] )
   end
 end
+
+class TspKit::Nodes::WeightMatrix
+  include TspKit::MarshalSupport
+  # @!visibility private
+  # Adds support for Marshal, via to_h and from_h methods
+  def to_h
+    Hash[
+      :weights => self.weights
+    ]
+  end
+
+  # @!visibility private
+  # Constructs a TspKit::Nodes::WeightMatrix from hash description. Used internally to support Marshal.
+  # @param [Hash] h Keys are :weights
+  # @return [TspKit::Nodes::WeightMatrix] new object
+  def self.from_h h
+    TspKit::Nodes::WeightMatrix.from_data( h[:weights] )
+  end
+end

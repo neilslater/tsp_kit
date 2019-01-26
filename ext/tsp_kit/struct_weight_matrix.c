@@ -68,3 +68,46 @@ WeightMatrix * weight_matrix__clone( WeightMatrix *weight_matrix_orig ) {
   weight_matrix__deep_copy( weight_matrix_copy, weight_matrix_orig );
   return weight_matrix_copy;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool weight_matrix__validate( WeightMatrix *weight_matrix ) {
+  bool ok = true;
+  int n = weight_matrix->num_nodes;
+  double *w = weight_matrix->weights;
+
+  for( int i = 0; i < (n - 1); i++ ) {
+    if ( w[i * n + i] != 0.0 ) {
+      ok = false;
+      break;
+    }
+
+    for( int j = i + 1; j < weight_matrix->num_nodes; j++ ) {
+      if ( w[i * n + j] != w[j * n + i] || w[i * n + j] < 0.0 ) {
+        ok = false;
+        break;
+      }
+    }
+
+    if (! ok) break;
+  }
+
+  return ok;
+}
+
+double weight_matrix__distance_between( void *nodes_addr, int node_a_id, int node_b_id ) {
+  WeightMatrix *nodes = (WeightMatrix *) nodes_addr;
+  return nodes->weights[ node_a_id * nodes->num_nodes + node_b_id ];
+}
+
+void weight_matrix__all_distances_from( void *nodes_addr, int node_id, double *distances_buffer ) {
+  WeightMatrix *nodes = (WeightMatrix *) nodes_addr;
+  int numn = nodes->num_nodes;
+  int offset = numn * node_id;
+
+  for( int j = 0; j < numn; j++ ) {
+    distances_buffer[j] = nodes->weights[ offset + j ];
+  }
+
+  return;
+}

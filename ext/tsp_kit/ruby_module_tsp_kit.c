@@ -143,8 +143,8 @@ void init_module_tsp_kit() {
   // Node types (just 2d Euc to start with)
   TspKit_Nodes = rb_define_class_under( TspKit, "Nodes", rb_cObject );
   TspKit_EuclideanNodes = rb_define_class_under( TspKit_Nodes, "Euclidean", rb_cObject );
+  TspKit_WeightMatrix = rb_define_class_under( TspKit_Nodes, "WeightMatrix", rb_cObject );
 
-  TspKit_WeightMatrix = rb_define_class_under( TspKit, "WeightMatrix", rb_cObject );
   TspKit_DistanceRank = rb_define_class_under( TspKit, "DistanceRank", rb_cObject );
   TspKit_Solution = rb_define_class_under( TspKit, "Solution", rb_cObject );
 

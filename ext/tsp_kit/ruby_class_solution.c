@@ -25,7 +25,7 @@ Solution *get_solution_struct( VALUE obj ) {
 void assert_value_wraps_solution( VALUE obj ) {
   if ( TYPE(obj) != T_DATA ||
       RDATA(obj)->dfree != (RUBY_DATA_FUNC)solution__destroy) {
-    rb_raise( rb_eTypeError, "Expected a Solution object, but got something else" );
+    rb_raise( rb_eTypeError, "Expected a TspKit::Solution object, but got something else" );
   }
 }
 

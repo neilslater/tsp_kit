@@ -1,6 +1,7 @@
 // ext/tsp_kit/ruby_class_euclidean_nodes.c
 
 #include "ruby_class_euclidean_nodes.h"
+#include "ruby_class_weight_matrix.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -109,7 +110,7 @@ VALUE euclidean_nodes_rbobject__get_narr_locations( VALUE self ) {
 /* @overload from_data( locations )
  * Creates new TspKit::Nodes::Euclidean object directly from NArray of locations
  *
- * @return [TspKit::Nodes::Euclideans] new instance
+ * @return [TspKit::Nodes::Euclidean] new instance
  */
 VALUE euclidean_nodes_rbclass__from_data( VALUE self, VALUE rv_locations) {
   struct NARRAY *narr;
@@ -193,6 +194,25 @@ VALUE euclidean_nodes_rbobject__all_distances_from( VALUE self, VALUE rv_node_id
   return rv_result;
 }
 
+/* @overload to_weight_matrix( )
+ * Converts to a weight matrix
+ * @return [TspKit::Nodes::Euclidean] weight matrix representation of same problem
+ */
+VALUE euclidean_nodes_rbobject__to_weight_matrix( VALUE self ) {
+  VALUE rv_wm;
+  WeightMatrix *wm;
+  EuclideanNodes *euclidean_nodes = get_euclidean_nodes_struct( self );
+
+  if ( euclidean_nodes->num_nodes > 50000 ) {
+    rb_raise(rb_eRuntimeError, "number of nodes %d is too large for conversion", euclidean_nodes->num_nodes);
+  }
+
+  wm = euclidean_nodes__create_weight_matrix( euclidean_nodes );
+  rv_wm = weight_matrix_as_ruby_class( wm, TspKit_WeightMatrix );
+
+  return rv_wm;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void init_euclidean_nodes_class( ) {
@@ -210,4 +230,5 @@ void init_euclidean_nodes_class( ) {
   // EuclideanNodes methods
   rb_define_method( TspKit_EuclideanNodes, "distance_between", euclidean_nodes_rbobject__distance_between, 2 );
   rb_define_method( TspKit_EuclideanNodes, "all_distances_from", euclidean_nodes_rbobject__all_distances_from, 1 );
+  rb_define_method( TspKit_EuclideanNodes, "to_weight_matrix", euclidean_nodes_rbobject__to_weight_matrix, 0 );
 }

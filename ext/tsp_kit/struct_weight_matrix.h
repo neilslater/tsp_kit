@@ -19,6 +19,8 @@ typedef struct _weight_matrix_raw {
   double *weights;
   } WeightMatrix;
 
+#include "struct_euclidean_nodes.h"
+
 WeightMatrix *weight_matrix__create();
 
 void weight_matrix__init( WeightMatrix *weight_matrix, int num_nodes );

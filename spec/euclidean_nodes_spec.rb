@@ -136,5 +136,30 @@ describe TspKit::Nodes::Euclidean do
         )
       end
     end
+
+    describe "#to_weight_matrix" do
+      subject { TspKit::Nodes::Euclidean.new(6, 3) }
+
+      before :each do
+        NArray.srand(12324124)
+        subject.random!
+      end
+
+      it "returns a weight matrix of all distances" do
+        wm = subject.to_weight_matrix
+        expect( wm ).to be_a TspKit::Nodes::WeightMatrix
+
+        expect( wm.weights ).to be_narray_like(
+          NArray[
+            [ 0.000000, 65.414892, 69.636629, 59.594620, 59.034899, 73.764380],
+            [65.414892,  0.000000, 68.040486, 89.214107, 86.305504, 55.552064],
+            [69.636629, 68.040487,  0.000000, 36.701962, 32.230178, 17.755599],
+            [59.594620, 89.214107, 36.701962,  0.000000, 6.8591116, 52.892410],
+            [59.034899, 86.305504, 32.230178, 6.8591116,  0.000000, 48.747318],
+            [73.764380, 55.552064, 17.755599, 52.892410, 48.747318,  0.000000]
+          ]
+        )
+      end
+    end
   end
 end

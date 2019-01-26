@@ -4,8 +4,11 @@
  * TspKit::DistanceRank and method to generate from any TspKit::Nodes subclass
   * Input TspKit::Nodes, output TspKit::DistanceRank
 
+
+
  * TspKit::SubGraph and method to generate from any TspKit::DistanceRank
-  * Input TspKit::DistanceRank, output TspKit::SubGraph (which is really just a TspKit::DistanceRank?)
+  * Input TspKit::DistanceRank, output TspKit::SubGraph (which is really just a TspKit::DistanceRank?) ?
+
 
  * TspKit::OneTree and generate from any TspKit::Nodes and/or TspKit::SubGraph
   * Input TspKit::Nodes, TspKit::SubGraph (optional), output TspKit::OneTree

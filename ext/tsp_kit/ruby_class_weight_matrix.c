@@ -1,6 +1,7 @@
 // ext/tsp_kit/ruby_class_weight_matrix.c
 
 #include "ruby_class_weight_matrix.h"
+#include "ruby_class_distance_rank.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -196,6 +197,31 @@ VALUE weight_matrix_rbobject__all_distances_from( VALUE self, VALUE rv_node_id )
   return rv_result;
 }
 
+/* @overload to_distance_rank( max_rank )
+ * Creates a new DistanceRank from the distances
+ * @param [Integer] max_rank maximum distance rank distance to consider
+ * @return [TspKit::DistanceRank] distance rank summary
+ */
+VALUE weight_matrix_rbobject__to_distance_rank( VALUE self, VALUE rv_max_rank ) {
+  int max_rank;
+  VALUE rv_dr;
+  DistanceRank *dr;
+  WeightMatrix *weight_matrix = get_weight_matrix_struct( self );
+
+  max_rank = NUM2INT(rv_max_rank);
+  if ( max_rank < 2 || max_rank > (weight_matrix->num_nodes - 1) ) {
+    rb_raise(rb_eArgError, "max_rank %d is out of bounds 2..%d", max_rank, (weight_matrix->num_nodes - 1));
+  }
+
+  dr = distance_rank__from_weight_matrix( weight_matrix, max_rank );
+  rv_dr = distance_rank_as_ruby_class( dr, TspKit_DistanceRank );
+
+  return rv_dr;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void init_weight_matrix_class( ) {
   // WeightMatrix instantiation and class methods
   rb_define_alloc_func( TspKit_WeightMatrix, weight_matrix_alloc );
@@ -211,4 +237,5 @@ void init_weight_matrix_class( ) {
   rb_define_method( TspKit_WeightMatrix, "validate", weight_matrix_rbobject__validate, 0 );
   rb_define_method( TspKit_WeightMatrix, "distance_between", weight_matrix_rbobject__distance_between, 2 );
   rb_define_method( TspKit_WeightMatrix, "all_distances_from", weight_matrix_rbobject__all_distances_from, 1 );
+  rb_define_method( TspKit_WeightMatrix, "to_distance_rank", weight_matrix_rbobject__to_distance_rank, 1 );
 }

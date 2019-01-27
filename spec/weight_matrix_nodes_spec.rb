@@ -147,5 +147,34 @@ describe TspKit::Nodes::WeightMatrix do
         )
       end
     end
+
+    describe "#to_distance_rank" do
+      subject { TspKit::Nodes::WeightMatrix.new(10) }
+
+      before :each do
+        NArray.srand(12324124)
+        subject.random!
+      end
+
+      it "returns a sorted of array of nearest nodes by id" do
+        dr = subject.to_distance_rank(7)
+        expect( dr ).to be_a TspKit::DistanceRank
+
+        expect( dr.closest_nodes ).to be_narray_like(
+          NArray[
+            [ 7, 5, 6, 3, 2, 9, 4 ],
+            [ 6, 5, 4, 3, 8, 7, 0 ],
+            [ 5, 0, 7, 8, 4, 6, 3 ],
+            [ 4, 8, 5, 0, 1, 7, 6 ],
+            [ 3, 9, 1, 5, 7, 0, 2 ],
+            [ 3, 2, 0, 7, 6, 1, 8 ],
+            [ 1, 9, 5, 7, 0, 3, 4 ],
+            [ 0, 5, 6, 9, 2, 3, 4 ],
+            [ 3, 5, 1, 2, 0, 9, 7 ],
+            [ 6, 4, 7, 0, 5, 8, 2 ]
+          ]
+        )
+      end
+    end
   end
 end

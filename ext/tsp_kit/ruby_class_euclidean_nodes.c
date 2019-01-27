@@ -2,6 +2,7 @@
 
 #include "ruby_class_euclidean_nodes.h"
 #include "ruby_class_weight_matrix.h"
+#include "ruby_class_distance_rank.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -213,6 +214,29 @@ VALUE euclidean_nodes_rbobject__to_weight_matrix( VALUE self ) {
   return rv_wm;
 }
 
+/* @overload to_distance_rank( max_rank )
+ * Creates a new DistanceRank from the distances
+ * @param [Integer] max_rank maximum distance rank distance to consider
+ * @return [TspKit::DistanceRank] distance rank summary
+ */
+VALUE euclidean_nodes_rbobject__to_distance_rank( VALUE self, VALUE rv_max_rank ) {
+  int max_rank;
+  VALUE rv_dr;
+  DistanceRank *dr;
+  EuclideanNodes *euclidean_nodes = get_euclidean_nodes_struct( self );
+
+  max_rank = NUM2INT(rv_max_rank);
+  if ( max_rank < 2 || max_rank > (euclidean_nodes->num_nodes - 1) ) {
+    rb_raise(rb_eArgError, "max_rank %d is out of bounds 2..%d", max_rank, (euclidean_nodes->num_nodes - 1));
+  }
+
+  dr = distance_rank__from_euclidean_nodes( euclidean_nodes, max_rank );
+  rv_dr = distance_rank_as_ruby_class( dr, TspKit_DistanceRank );
+
+  return rv_dr;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void init_euclidean_nodes_class( ) {
@@ -231,4 +255,6 @@ void init_euclidean_nodes_class( ) {
   rb_define_method( TspKit_EuclideanNodes, "distance_between", euclidean_nodes_rbobject__distance_between, 2 );
   rb_define_method( TspKit_EuclideanNodes, "all_distances_from", euclidean_nodes_rbobject__all_distances_from, 1 );
   rb_define_method( TspKit_EuclideanNodes, "to_weight_matrix", euclidean_nodes_rbobject__to_weight_matrix, 0 );
+  rb_define_method( TspKit_EuclideanNodes, "to_distance_rank", euclidean_nodes_rbobject__to_distance_rank, 1 );
+
 }

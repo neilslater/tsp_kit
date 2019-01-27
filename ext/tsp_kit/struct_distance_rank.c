@@ -84,6 +84,7 @@ DistanceRank * distance_rank__from_euclidean_nodes( EuclideanNodes *nodes, int m
   DistanceRank *dr = distance_rank__create();
   distance_rank__init( dr, num_nodes, max_rank );
   node_ids = ALLOC_N( int, num_nodes );
+  distances = ALLOC_N( double, num_nodes );
 
   for( int i = 0; i < num_nodes; i++ ) {
     node_ids[i] = i;
@@ -117,6 +118,7 @@ DistanceRank * distance_rank__from_weight_matrix( WeightMatrix *nodes, int max_r
   DistanceRank *dr = distance_rank__create();
   distance_rank__init( dr, num_nodes, max_rank );
   node_ids = ALLOC_N( int, num_nodes );
+  distances = ALLOC_N( double, num_nodes );
 
   for( int i = 0; i < num_nodes; i++ ) {
     node_ids[i] = i;

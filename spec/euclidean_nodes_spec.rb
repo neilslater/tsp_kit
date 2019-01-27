@@ -161,5 +161,30 @@ describe TspKit::Nodes::Euclidean do
         )
       end
     end
+
+    describe "#to_distance_rank" do
+      subject { TspKit::Nodes::Euclidean.new(6, 3) }
+
+      before :each do
+        NArray.srand(12324124)
+        subject.random!
+      end
+
+      it "returns a sorted of array of nearest nodes by id" do
+        dr = subject.to_distance_rank(4)
+        expect( dr ).to be_a TspKit::DistanceRank
+
+        expect( dr.closest_nodes ).to be_narray_like(
+          NArray[
+            [ 4, 3, 1, 2 ],
+            [ 5, 0, 2, 4 ],
+            [ 5, 4, 3, 1 ],
+            [ 4, 2, 5, 0 ],
+            [ 3, 2, 5, 0 ],
+            [ 2, 4, 3, 1 ]
+          ]
+        )
+      end
+    end
   end
 end

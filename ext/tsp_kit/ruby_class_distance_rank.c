@@ -107,6 +107,9 @@ VALUE distance_rank_rbobject__get_narr_closest_nodes( VALUE self ) {
   return distance_rank->narr_closest_nodes;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 /* @overload from_data( closest_nodes )
  * Creates new TspKit::DistanceRank object directly from NArray of closest_nodes
  *
@@ -148,7 +151,6 @@ VALUE distance_rank_rbclass__from_data( VALUE self, VALUE rv_closest_nodes) {
   dr->closest_nodes_shape[1] = num_nodes;
   return rv_dr;
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

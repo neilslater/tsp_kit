@@ -1,7 +1,3 @@
- * TspKit::DistanceRank and method to generate from any TspKit::Nodes subclass
-  * Input TspKit::Nodes, output TspKit::DistanceRank
-
-
  * TspKit::SubGraph and method to generate from any TspKit::DistanceRank (?)
   * Input TspKit::DistanceRank, output TspKit::SubGraph (which is really just a TspKit::DistanceRank?) ?
 

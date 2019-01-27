@@ -19,6 +19,9 @@ typedef struct _distance_rank_raw {
   int32_t *closest_nodes;
   } DistanceRank;
 
+#include "struct_weight_matrix.h"
+#include "struct_euclidean_nodes.h"
+
 DistanceRank *distance_rank__create();
 
 void distance_rank__init( DistanceRank *distance_rank, int num_nodes, int max_rank );
@@ -30,5 +33,11 @@ void distance_rank__gc_mark( DistanceRank *distance_rank );
 void distance_rank__deep_copy( DistanceRank *distance_rank_copy, DistanceRank *distance_rank_orig );
 
 DistanceRank * distance_rank__clone( DistanceRank *distance_rank_orig );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+DistanceRank * distance_rank__from_euclidean_nodes( EuclideanNodes *nodes, int max_rank );
+
+DistanceRank * distance_rank__from_weight_matrix( WeightMatrix *nodes, int max_rank );
 
 #endif

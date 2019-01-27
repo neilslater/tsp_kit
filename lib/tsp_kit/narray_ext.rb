@@ -87,3 +87,22 @@ class TspKit::Nodes::WeightMatrix
     TspKit::Nodes::WeightMatrix.from_data( h[:weights] )
   end
 end
+
+class TspKit::DistanceRank
+  include TspKit::MarshalSupport
+  # @!visibility private
+  # Adds support for Marshal, via to_h and from_h methods
+  def to_h
+    Hash[
+      :closest_nodes => self.closest_nodes
+    ]
+  end
+
+  # @!visibility private
+  # Constructs a TspKit::DistanceRankfrom hash description. Used internally to support Marshal.
+  # @param [Hash] h Keys are :closest_nodes
+  # @return [TspKit::DistanceRank] new object
+  def self.from_h h
+    TspKit::DistanceRank.from_data( h[:closest_nodes] )
+  end
+end

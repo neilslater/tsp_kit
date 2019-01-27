@@ -39,13 +39,24 @@ void assert_value_wraps_distance_rank( VALUE obj ) {
 //
 
 /* @overload initialize( num_nodes, max_rank )
- * Creates a new ...
+ * Creates a new TspKit::DistanceRank
  * @param [Integer] num_nodes ...
  * @param [Integer] max_rank ...
- * @return [TspKit::DistanceRank] new ...
+ * @return [TspKit::DistanceRank] new TspKit::DistanceRank
  */
 VALUE distance_rank_rbobject__initialize( VALUE self, VALUE rv_num_nodes, VALUE rv_max_rank ) {
   DistanceRank *distance_rank = get_distance_rank_struct( self );
+  int num_nodes, max_rank;
+
+  num_nodes = NUM2INT( rv_num_nodes );
+  if (num_nodes < 3 || num_nodes > 10000000) {
+    rb_raise(rb_eArgError, "num_nodes %d is outside accepted range 3..10000000", num_nodes);
+  }
+
+  max_rank = NUM2INT( rv_max_rank );
+  if ( max_rank < 2 || max_rank > (num_nodes - 1) ) {
+    rb_raise(rb_eArgError, "max_rank %d is outside accepted range 2..%d", max_rank, num_nodes - 1);
+  }
 
   distance_rank__init( distance_rank, NUM2INT( rv_num_nodes ), NUM2INT( rv_max_rank ) );
 
@@ -96,6 +107,49 @@ VALUE distance_rank_rbobject__get_narr_closest_nodes( VALUE self ) {
   return distance_rank->narr_closest_nodes;
 }
 
+/* @overload from_data( closest_nodes )
+ * Creates new TspKit::DistanceRank object directly from NArray of closest_nodes
+ *
+ * @return [TspKit::DistanceRank] new instance
+ */
+VALUE distance_rank_rbclass__from_data( VALUE self, VALUE rv_closest_nodes) {
+  struct NARRAY *narr;
+  int num_nodes, max_rank;
+  VALUE rv_dr;
+  DistanceRank *dr;
+
+  rv_closest_nodes = na_cast_object(rv_closest_nodes, NA_LINT);
+  GetNArray( rv_closest_nodes, narr );
+  if (narr->rank != 2) {
+    rb_raise(rb_eArgError, "closest_nodes array should have rank 2, but is rank %d", narr->rank);
+  }
+
+  max_rank = narr->shape[0];
+  num_nodes = narr->shape[1];
+
+  if (num_nodes < 3 || num_nodes > 10000000) {
+    rb_raise(rb_eArgError, "num_nodes %d is outside accepted range 3..10000000", num_nodes);
+  }
+
+  if (max_rank < 2 || max_rank > (num_nodes-1)) {
+    rb_raise(rb_eArgError, "max_rank %d is outside accepted range 2..%d", max_rank, num_nodes-1);
+  }
+
+  // Possible TODO - check that contents of distance_rank are valid
+
+  rv_dr = distance_rank_alloc( TspKit_DistanceRank );
+  dr = get_distance_rank_struct( rv_dr );
+  dr->num_nodes = num_nodes;
+  dr->max_rank = max_rank;
+  dr->narr_closest_nodes = rv_closest_nodes;
+  dr->closest_nodes = (int *) narr->ptr;
+  dr->closest_nodes_shape = ALLOC_N( int, 2 );
+  dr->closest_nodes_shape[0] = max_rank;
+  dr->closest_nodes_shape[1] = num_nodes;
+  return rv_dr;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void init_distance_rank_class( ) {
@@ -103,6 +157,7 @@ void init_distance_rank_class( ) {
   rb_define_alloc_func( TspKit_DistanceRank, distance_rank_alloc );
   rb_define_method( TspKit_DistanceRank, "initialize", distance_rank_rbobject__initialize, 2 );
   rb_define_method( TspKit_DistanceRank, "initialize_copy", distance_rank_rbobject__initialize_copy, 1 );
+  rb_define_singleton_method( TspKit_DistanceRank, "from_data", distance_rank_rbclass__from_data, 1 );
 
   // DistanceRank attributes
   rb_define_method( TspKit_DistanceRank, "num_nodes", distance_rank_rbobject__get_num_nodes, 0 );

@@ -1,6 +1,8 @@
 // ext/tsp_kit/ruby_class_distance_rank.c
 
 #include "ruby_class_distance_rank.h"
+#include "ruby_class_euclidean_nodes.h"
+#include "ruby_class_weight_matrix.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -172,6 +174,43 @@ VALUE distance_rank_rbobject__resize( VALUE self, VALUE rv_new_max_rank ) {
 }
 
 
+/* @overload bidirectional( nodes, rank_cutoff )
+ * Ajusts distance rank to cover bidirectional links. If node A has node B in the adjacency list, then
+ * B will have A in its list
+ *
+ * @return [TspKit::DistanceRank] self
+ */
+VALUE distance_rank_rbobject__bidirectional( VALUE self, VALUE rv_nodes, VALUE rv_rank_cutoff ) {
+  DistanceRank *distance_rank = get_distance_rank_struct( self );
+  bool is_euc, is_wm;
+  EuclideanNodes * euc_nodes;
+  WeightMatrix * wm_nodes;
+
+  is_euc = false;
+  is_wm = false;
+
+  if ( TYPE(rv_nodes) == T_DATA && RDATA(rv_nodes)->dfree == (RUBY_DATA_FUNC)euclidean_nodes__destroy) {
+    is_euc = true;
+    euc_nodes = get_euclidean_nodes_struct( rv_nodes );
+  } else if ( TYPE(rv_nodes) == T_DATA && RDATA(rv_nodes)->dfree == (RUBY_DATA_FUNC)weight_matrix__destroy) {
+    is_wm = true;
+    wm_nodes = get_weight_matrix_struct( rv_nodes );
+  } else {
+    rb_raise(rb_eArgError, "Unrecognised node subtype");
+  }
+
+  int rank_cutoff = NUM2INT(rv_rank_cutoff);
+  if (rank_cutoff < 2 || rank_cutoff > (distance_rank->num_nodes - 1)) {
+    rb_raise(rb_eArgError, "rank_cutoff %d is outside accepted range 2..%d", rank_cutoff, distance_rank->num_nodes-1);
+  }
+
+  if (is_euc) distance_rank__bidirectional( distance_rank, euc_nodes, euclidean_nodes__distance_between, rank_cutoff );
+
+  if (is_wm) distance_rank__bidirectional( distance_rank, wm_nodes, weight_matrix__distance_between, rank_cutoff );
+
+  return self;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void init_distance_rank_class( ) {
@@ -186,4 +225,6 @@ void init_distance_rank_class( ) {
   rb_define_method( TspKit_DistanceRank, "max_rank", distance_rank_rbobject__get_max_rank, 0 );
   rb_define_method( TspKit_DistanceRank, "closest_nodes", distance_rank_rbobject__get_narr_closest_nodes, 0 );
   rb_define_method( TspKit_DistanceRank, "resize", distance_rank_rbobject__resize, 1 );
+
+  rb_define_method( TspKit_DistanceRank, "bidirectional", distance_rank_rbobject__bidirectional, 2 );
 }

@@ -116,5 +116,25 @@ describe TspKit::DistanceRank do
         expect( subject.max_rank ).to be 5
       end
     end
+
+    describe "#bidirectional" do
+      let(:nodes) { NArray.srand(12324124); n = TspKit::Nodes::Euclidean.new(6, 3); n.random!; n }
+      subject { nodes.to_distance_rank(4) }
+
+      it "ensures that connections are bidirectional" do
+        subject.bidirectional( nodes, 2 )
+        expect( subject.closest_nodes ).to be_narray_like(
+          NArray[
+            [ 4, 3, 1, -1 ],
+            [ 5, 0, -1, -1 ],
+            [ 5, 4, 3, -1 ],
+            [ 4, 2, 0, -1 ],
+            [ 3, 2, 5, 0 ],
+            [ 2, 4, 1, -1 ]
+          ]
+        )
+        expect( subject.max_rank ).to be 2
+      end
+    end
   end
 end

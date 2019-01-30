@@ -1,7 +1,6 @@
 // ext/tsp_kit/struct_distance_rank.c
 
 #include "struct_distance_rank.h"
-#include "utilities.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -182,17 +181,24 @@ void distance_rank__resize( DistanceRank *distance_rank, int new_max_rank ) {
   return;
 }
 
-/*
-// TODO: This is from Santa2018, and needs adapting to new framework
-int distance_rank__reciprocate( DistanceRank *distance_rank, Cities * cities, int rank_cutoff ) {
+// This is called in a loop by another method that ensures we have enough size
+int distance_rank__reciprocate( DistanceRank *distance_rank, void * nodes, DISTANCEFN dfunc, int rank_cutoff, int max_ranks_buffer ) {
   int i, j, n, m, p, q;
   bool found;
   int *k;
-  int *matrix = distance_rank->closest_cities;
+  int *matrix;
   int max_max_rank = rank_cutoff;
-  n = distance_rank->num_cities;
-  m = distance_rank->max_rank;
+  double * distances;
 
+  // Resize to buffer
+  distance_rank__resize( distance_rank, max_ranks_buffer );
+
+  n = distance_rank->num_nodes;
+  m = distance_rank->max_rank;
+  matrix = distance_rank->closest_nodes;
+  distances = ALLOC_N( double, n );
+
+  // Clear out any "extras"
   for(i = 0; i < n; i++) {
     for(j = rank_cutoff; j < m; j++) {
       matrix[i*m + j] = -1;
@@ -201,11 +207,14 @@ int distance_rank__reciprocate( DistanceRank *distance_rank, Cities * cities, in
 
   k = ALLOC_N( int, n );
   for(i = 0; i < n; i++) {
-    k[i] = rank_cutoff;
+    for(j = 0; j < rank_cutoff; j++) {
+      if (matrix[i*m + j] < 0 ) break;
+    }
+    k[i] = j; // This is first -1 entry for node i, which may be less than the reciprocate limit
   }
 
   for(i = 0; i < n; i++) {
-    for(j = 0; j < rank_cutoff; j++) {
+    for(j = 0; j < k[i]; j++) {
       // i mentions p . . .
       p = matrix[i*m + j];
 
@@ -222,25 +231,62 @@ int distance_rank__reciprocate( DistanceRank *distance_rank, Cities * cities, in
         if (k[p] < m) {
           matrix[p*m + k[p]] = i;
         }
-        k[p] ++;
+        k[p]++;
         if (k[p] > max_max_rank) {
           max_max_rank = k[p];
         }
       }
     }
 
-    // TODO: Sort the new items in distance order (not necessary for Prim's though .  . .)
-
+    // TODO: Some kind of callback?
+    /*
     if ((i % 100) == 0) {
       printf(" Reciprocating minimum %d links. City %d, max rank required so far %d   \r", rank_cutoff, i, max_max_rank);
       fflush(stdout);
     }
+    */
+  }
+
+  // Sort each row in distance order
+  for(i = 0; i < n; i++) {
+    for(j = 0; j < k[i]; j++) {
+      p = matrix[i*m + j];
+      distances[p] = (*dfunc)( nodes, i, p );
+    }
+    quicksort_ids_by_double( (matrix + i*m), distances, 0, k[i] - 1 );
   }
 
   xfree(k);
+  xfree(distances);
 
-  printf("Reciprocating minimum %d links. Completed, max rank required %d                    \n", rank_cutoff, max_max_rank);
+  // printf("Reciprocating minimum %d links. Completed, max rank required %d                    \n", rank_cutoff, max_max_rank);
 
   return max_max_rank;
 }
-*/
+
+void distance_rank__bidirectional( DistanceRank *distance_rank, void * nodes, DISTANCEFN dfunc, int rank_cutoff ) {
+  int max_ranks_buffer, needed_max_ranks;
+
+  if (rank_cutoff >= distance_rank->num_nodes) {
+    rank_cutoff = distance_rank->num_nodes - 1;
+  }
+
+  max_ranks_buffer = rank_cutoff * 2;
+  if (max_ranks_buffer >= distance_rank->num_nodes) {
+    max_ranks_buffer = distance_rank->num_nodes - 1;
+  }
+
+  needed_max_ranks = distance_rank__reciprocate( distance_rank, nodes, dfunc, rank_cutoff, max_ranks_buffer );
+
+  // Downsize
+  if (needed_max_ranks < max_ranks_buffer) {
+    distance_rank__resize( distance_rank, needed_max_ranks );
+  }
+
+  // Re-do at correct larger size
+  if (needed_max_ranks > max_ranks_buffer) {
+    distance_rank__reciprocate( distance_rank, nodes, dfunc, rank_cutoff, needed_max_ranks );
+  }
+
+  return;
+}

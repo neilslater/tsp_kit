@@ -21,6 +21,7 @@ typedef struct _distance_rank_raw {
 
 #include "struct_weight_matrix.h"
 #include "struct_euclidean_nodes.h"
+#include "utilities.h"
 
 DistanceRank *distance_rank__create();
 
@@ -41,5 +42,7 @@ DistanceRank * distance_rank__from_euclidean_nodes( EuclideanNodes *nodes, int m
 DistanceRank * distance_rank__from_weight_matrix( WeightMatrix *nodes, int max_rank );
 
 void distance_rank__resize( DistanceRank *distance_rank, int new_max_rank );
+
+void distance_rank__bidirectional( DistanceRank *distance_rank, void * nodes, DISTANCEFN dfunc, int rank_cutoff );
 
 #endif

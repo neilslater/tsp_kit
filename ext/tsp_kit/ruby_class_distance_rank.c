@@ -152,6 +152,26 @@ VALUE distance_rank_rbclass__from_data( VALUE self, VALUE rv_closest_nodes) {
   return rv_dr;
 }
 
+/* @overload resize( new_max_rank )
+ * Re-sizes distance rank to new max rank. When increasing size, it does not recalculate extra distances
+ * so the main use of this is to reduce the max_rank
+ *
+ * @return [TspKit::DistanceRank] self
+ */
+VALUE distance_rank_rbobject__resize( VALUE self, VALUE rv_new_max_rank ) {
+  DistanceRank *distance_rank = get_distance_rank_struct( self );
+  int new_max_rank = NUM2INT(rv_new_max_rank);
+
+  if (new_max_rank < 2 || new_max_rank > (distance_rank->num_nodes - 1)) {
+    rb_raise(rb_eArgError, "new_max_rank %d is outside accepted range 2..%d", new_max_rank, distance_rank->num_nodes-1);
+  }
+
+  distance_rank__resize( distance_rank, new_max_rank );
+
+  return self;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void init_distance_rank_class( ) {
@@ -165,4 +185,5 @@ void init_distance_rank_class( ) {
   rb_define_method( TspKit_DistanceRank, "num_nodes", distance_rank_rbobject__get_num_nodes, 0 );
   rb_define_method( TspKit_DistanceRank, "max_rank", distance_rank_rbobject__get_max_rank, 0 );
   rb_define_method( TspKit_DistanceRank, "closest_nodes", distance_rank_rbobject__get_narr_closest_nodes, 0 );
+  rb_define_method( TspKit_DistanceRank, "resize", distance_rank_rbobject__resize, 1 );
 }

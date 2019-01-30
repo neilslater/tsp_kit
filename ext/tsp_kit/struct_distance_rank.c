@@ -35,7 +35,7 @@ void distance_rank__init( DistanceRank *distance_rank, int num_nodes, int max_ra
   GetNArray( distance_rank->narr_closest_nodes, narr );
   narr_closest_nodes_ptr = (int32_t*) narr->ptr;
   for( i = 0; i < narr->total; i++ ) {
-    narr_closest_nodes_ptr[i] = 0;
+    narr_closest_nodes_ptr[i] = -1;
   }
   distance_rank->closest_nodes = (int32_t *) narr->ptr;
 
@@ -143,3 +143,105 @@ DistanceRank * distance_rank__from_weight_matrix( WeightMatrix *nodes, int max_r
   xfree( node_ids );
   return dr;
 }
+
+void distance_rank__resize( DistanceRank *distance_rank, int new_max_rank ) {
+  int i, j, nn, copy_size;
+  int *new_cn_ptr;
+  struct NARRAY *narr;
+  VALUE new_cn;
+
+  nn = distance_rank->num_nodes;
+  distance_rank->closest_nodes_shape[0] = new_max_rank;
+  new_cn = na_make_object( NA_LINT, 2, distance_rank->closest_nodes_shape, cNArray );
+
+  GetNArray( distance_rank->narr_closest_nodes, narr );
+  new_cn_ptr = (int32_t*) narr->ptr;
+
+  copy_size = new_max_rank;
+  if (new_max_rank > distance_rank->max_rank) {
+    copy_size = distance_rank->max_rank;
+  }
+
+  for( i = 0; i < nn; i++ ) {
+    memcpy( (new_cn_ptr + i * new_max_rank), (distance_rank->closest_nodes + i * distance_rank->max_rank), copy_size * sizeof(int32_t) );
+  }
+
+  // We *could* recalculate distances here, but user can always do that. Instead we add empty space.
+  if (new_max_rank > distance_rank->max_rank) {
+    for( i = 0; i < nn; i++ ) {
+      for( j = copy_size; j < new_max_rank; j++ ) {
+        new_cn_ptr[i * new_max_rank + j] = -1;
+      }
+    }
+  }
+
+  distance_rank->closest_nodes_shape[0] = new_max_rank;
+  distance_rank->max_rank = new_max_rank;
+  distance_rank->closest_nodes = new_cn_ptr;
+  distance_rank->narr_closest_nodes = new_cn;
+
+  return;
+}
+
+/*
+// TODO: This is from Santa2018, and needs adapting to new framework
+int distance_rank__reciprocate( DistanceRank *distance_rank, Cities * cities, int rank_cutoff ) {
+  int i, j, n, m, p, q;
+  bool found;
+  int *k;
+  int *matrix = distance_rank->closest_cities;
+  int max_max_rank = rank_cutoff;
+  n = distance_rank->num_cities;
+  m = distance_rank->max_rank;
+
+  for(i = 0; i < n; i++) {
+    for(j = rank_cutoff; j < m; j++) {
+      matrix[i*m + j] = -1;
+    }
+  }
+
+  k = ALLOC_N( int, n );
+  for(i = 0; i < n; i++) {
+    k[i] = rank_cutoff;
+  }
+
+  for(i = 0; i < n; i++) {
+    for(j = 0; j < rank_cutoff; j++) {
+      // i mentions p . . .
+      p = matrix[i*m + j];
+
+      // Does p mention i back?
+      found = false;
+      for(q = 0; q < m; q++) {
+        if (matrix[p*m + q] == i) {
+          found = true;
+          break;
+        }
+      }
+      if (! found) {
+        // No, so add to p's list
+        if (k[p] < m) {
+          matrix[p*m + k[p]] = i;
+        }
+        k[p] ++;
+        if (k[p] > max_max_rank) {
+          max_max_rank = k[p];
+        }
+      }
+    }
+
+    // TODO: Sort the new items in distance order (not necessary for Prim's though .  . .)
+
+    if ((i % 100) == 0) {
+      printf(" Reciprocating minimum %d links. City %d, max rank required so far %d   \r", rank_cutoff, i, max_max_rank);
+      fflush(stdout);
+    }
+  }
+
+  xfree(k);
+
+  printf("Reciprocating minimum %d links. Completed, max rank required %d                    \n", rank_cutoff, max_max_rank);
+
+  return max_max_rank;
+}
+*/

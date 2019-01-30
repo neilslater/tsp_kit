@@ -1,5 +1,4 @@
- * TspKit::SubGraph and method to generate from any TspKit::DistanceRank (?)
-  * Input TspKit::DistanceRank, output TspKit::SubGraph (which is really just a TspKit::DistanceRank?) ?
+ * Output balanced DistanceRank from normal DistanceRank
 
 
  * TspKit::OneTree and generate from any TspKit::Nodes and/or TspKit::SubGraph

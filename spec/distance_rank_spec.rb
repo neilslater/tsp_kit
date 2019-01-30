@@ -81,5 +81,38 @@ describe TspKit::DistanceRank do
         expect( copy.closest_nodes ).to_not be subject.closest_nodes
       end
     end
+
+    describe "#resize" do
+      let(:nodes) { NArray.srand(12324124); n = TspKit::Nodes::Euclidean.new(6, 3); n.random!; n }
+      subject { nodes.to_distance_rank(4) }
+
+      it "can reduce number of closest items stored" do
+        subject.resize(2)
+        expect( subject.closest_nodes ).to be_narray_like(
+          NArray[
+            [ 4, 3 ],
+            [ 5, 0 ],
+            [ 5, 4 ],
+            [ 4, 2 ],
+            [ 3, 2 ],
+            [ 2, 4 ]
+          ]
+        )
+      end
+
+      it "can increase number of closest items stored" do
+        subject.resize(5)
+        expect( subject.closest_nodes ).to be_narray_like(
+          NArray[
+            [ 4, 3, 1, 2, -1 ],
+            [ 5, 0, 2, 4, -1 ],
+            [ 5, 4, 3, 1, -1 ],
+            [ 4, 2, 5, 0, -1 ],
+            [ 3, 2, 5, 0, -1 ],
+            [ 2, 4, 3, 1, -1 ]
+          ]
+        )
+      end
+    end
   end
 end

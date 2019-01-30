@@ -40,4 +40,6 @@ DistanceRank * distance_rank__from_euclidean_nodes( EuclideanNodes *nodes, int m
 
 DistanceRank * distance_rank__from_weight_matrix( WeightMatrix *nodes, int max_rank );
 
+void distance_rank__resize( DistanceRank *distance_rank, int new_max_rank );
+
 #endif

@@ -154,7 +154,7 @@ void distance_rank__resize( DistanceRank *distance_rank, int new_max_rank ) {
   distance_rank->closest_nodes_shape[0] = new_max_rank;
   new_cn = na_make_object( NA_LINT, 2, distance_rank->closest_nodes_shape, cNArray );
 
-  GetNArray( distance_rank->narr_closest_nodes, narr );
+  GetNArray( new_cn, narr );
   new_cn_ptr = (int32_t*) narr->ptr;
 
   copy_size = new_max_rank;
@@ -175,10 +175,9 @@ void distance_rank__resize( DistanceRank *distance_rank, int new_max_rank ) {
     }
   }
 
-  distance_rank->closest_nodes_shape[0] = new_max_rank;
   distance_rank->max_rank = new_max_rank;
-  distance_rank->closest_nodes = new_cn_ptr;
   distance_rank->narr_closest_nodes = new_cn;
+  distance_rank->closest_nodes = new_cn_ptr;
 
   return;
 }

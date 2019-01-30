@@ -98,6 +98,7 @@ describe TspKit::DistanceRank do
             [ 2, 4 ]
           ]
         )
+        expect( subject.max_rank ).to be 2
       end
 
       it "can increase number of closest items stored" do
@@ -112,6 +113,7 @@ describe TspKit::DistanceRank do
             [ 2, 4, 3, 1, -1 ]
           ]
         )
+        expect( subject.max_rank ).to be 5
       end
     end
   end

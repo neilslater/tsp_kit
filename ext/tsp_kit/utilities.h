@@ -1,4 +1,4 @@
-// ext/stolen_sleigh/utilities.h
+// ext/tsp_kit/utilities.h
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -15,11 +15,5 @@
 void quicksort_ids_by_double( int * ids, double * sort_by, int lowest, int highest );
 void quicksort_ints( int * ids, int lowest, int highest );
 void shuffle_ints( int n, int *array );
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-typedef double (*DISTANCEFN)(void*, int, int);
-
-typedef void (*DISTANCEARRAYFN)(void*, int, double*);
 
 #endif

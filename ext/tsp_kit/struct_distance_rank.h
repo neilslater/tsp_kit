@@ -19,9 +19,7 @@ typedef struct _distance_rank_raw {
   int32_t *closest_nodes;
   } DistanceRank;
 
-#include "struct_weight_matrix.h"
-#include "struct_euclidean_nodes.h"
-#include "utilities.h"
+#include "combined_nodes.h"
 
 DistanceRank *distance_rank__create();
 

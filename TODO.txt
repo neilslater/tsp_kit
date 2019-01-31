@@ -1,3 +1,4 @@
+Break out getting DISTANCEFN
 
  * TspKit::OneTree and generate from any TspKit::Nodes and/or TspKit::DistanceRank
   * Input TspKit::Nodes, TspKit::SubGraph (optional), output TspKit::OneTree

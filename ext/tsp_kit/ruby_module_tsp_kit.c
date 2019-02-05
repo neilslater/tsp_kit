@@ -129,28 +129,34 @@ VALUE TspKit = Qnil;
 
 VALUE TspKit_Nodes = Qnil;
 VALUE TspKit_EuclideanNodes = Qnil;
-
 VALUE TspKit_WeightMatrix = Qnil;
+
 VALUE TspKit_DistanceRank = Qnil;
+
+VALUE TspKit_Utils = Qnil;
+VALUE TspKit_PriorityQueue = Qnil;
+
 VALUE TspKit_Solution = Qnil;
 VALUE TspKit_GreedySolver = Qnil;
 VALUE TspKit_OneTree = Qnil;
-VALUE TspKit_PriorityQueue = Qnil;
 
 void init_module_tsp_kit() {
   TspKit = rb_define_module( "TspKit" );
 
-  // Node types (just 2d Euc to start with)
+  // Node types
   TspKit_Nodes = rb_define_class_under( TspKit, "Nodes", rb_cObject );
   TspKit_EuclideanNodes = rb_define_class_under( TspKit_Nodes, "Euclidean", rb_cObject );
   TspKit_WeightMatrix = rb_define_class_under( TspKit_Nodes, "WeightMatrix", rb_cObject );
+
+  // Utilities
+  TspKit_Utils = rb_define_class_under( TspKit, "Utils", rb_cObject );
+  TspKit_PriorityQueue = rb_define_class_under( TspKit_Utils, "PriorityQueue", rb_cObject );
+  TspKit_OneTree = rb_define_class_under( TspKit_Utils, "OneTree", rb_cObject );
 
   TspKit_DistanceRank = rb_define_class_under( TspKit, "DistanceRank", rb_cObject );
   TspKit_Solution = rb_define_class_under( TspKit, "Solution", rb_cObject );
 
   TspKit_GreedySolver = rb_define_class_under( TspKit, "GreedySolver", rb_cObject );
-  TspKit_OneTree = rb_define_class_under( TspKit, "OneTree", rb_cObject );
-  TspKit_PriorityQueue = rb_define_class_under( TspKit, "PriorityQueue", rb_cObject );
 
   rb_define_singleton_method( TspKit, "srand", rbmodule__srand, 1 );
   rb_define_singleton_method( TspKit, "srand_array", rbmodule__srand_array, 1 );

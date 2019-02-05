@@ -238,13 +238,7 @@ int distance_rank__reciprocate( DistanceRank *distance_rank, void * nodes, DISTA
       }
     }
 
-    // TODO: Some kind of callback?
-    /*
-    if ((i % 100) == 0) {
-      printf(" Reciprocating minimum %d links. City %d, max rank required so far %d   \r", rank_cutoff, i, max_max_rank);
-      fflush(stdout);
-    }
-    */
+    // TODO: Some kind of callback in order to display progress?
   }
 
   // Sort each row in distance order
@@ -253,13 +247,12 @@ int distance_rank__reciprocate( DistanceRank *distance_rank, void * nodes, DISTA
       p = matrix[i*m + j];
       distances[p] = (*dfunc)( nodes, i, p );
     }
-    quicksort_ids_by_double( (matrix + i*m), distances, 0, k[i] - 1 );
+    // Got to be careful not to extend sort into next row, as we may have over-run
+    quicksort_ids_by_double( (matrix + i*m), distances, 0, (k[i] < m ? k[i] - 1 : m - 1) );
   }
 
   xfree(k);
   xfree(distances);
-
-  // printf("Reciprocating minimum %d links. Completed, max rank required %d                    \n", rank_cutoff, max_max_rank);
 
   return max_max_rank;
 }

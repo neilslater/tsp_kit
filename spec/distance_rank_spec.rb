@@ -156,6 +156,38 @@ describe TspKit::DistanceRank do
           expect( subject.max_rank ).to be 5
         end
       end
+
+      context "with one favoured node" do
+        let(:nodes) do
+          NArray.srand(12324124)
+          n = TspKit::Nodes::WeightMatrix.new(10)
+          n.random!
+          [0,1,2,4,5,6,7,8,9].each do |i|
+            n.weights[3,i] = (3+i).to_f/10000
+            n.weights[i,3] = (3+i).to_f/10000
+          end
+          n
+        end
+
+        it "still expands the closest nodes array enough to cope" do
+          subject.bidirectional( nodes, 3 )
+          expect( subject.closest_nodes ).to be_narray_like(
+            NArray[
+              [ 3, 7, 5, 2, -1, -1, -1, -1, -1 ],
+              [ 3, 6, 5, 4, 8, -1, -1, -1, -1 ],
+              [ 3, 5, 0, -1, -1, -1, -1, -1, -1 ],
+              [ 0, 1, 2, 4, 5, 6, 7, 8, 9 ],
+              [ 3, 9, 1, -1, -1, -1, -1, -1, -1 ],
+              [ 3, 2, 0, 7, 1, 8, -1, -1, -1 ],
+              [ 3, 1, 9, -1, -1, -1, -1, -1, -1 ],
+              [ 3, 0, 5, -1, -1, -1, -1, -1, -1 ],
+              [ 3, 5, 1, -1, -1, -1, -1, -1, -1 ],
+              [ 3, 6, 4, -1, -1, -1, -1, -1, -1 ]
+            ]
+          )
+          expect( subject.max_rank ).to be 9
+        end
+      end
     end
   end
 end

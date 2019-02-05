@@ -88,6 +88,55 @@ VALUE priority_queue_rbobject__get_heap_root( VALUE self ) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+/* @overload push( id, priority )
+ * Adds prioritised element, or re-prioritises existing element
+ * @param [Integer] id ...
+ * @param [Float] priority ...
+ * @return [Santa2018::PriorityQueue] self
+ */
+VALUE priority_queue_rbobject__push( VALUE self, VALUE rv_id, VALUE rv_priority, VALUE rv_payload  ) {
+  PriorityQueue *priority_queue = get_priority_queue_struct( self );
+  priority_queue__push( priority_queue, NUM2INT( rv_id ), NUM2DBL( rv_priority ), NUM2INT( rv_payload ) );
+  return self;
+}
+
+/* @overload pop( )
+ * Returns highest-priority element, removing it from the queue
+ * @return [Integer]
+ */
+VALUE priority_queue_rbobject__pop( VALUE self ) {
+  PriorityQueue *priority_queue = get_priority_queue_struct( self );
+  return INT2NUM( priority_queue__pop( priority_queue ) );
+}
+
+/* @overload peek( )
+ * Returns highest-priority element, but does not remove it from the queue
+ * @return [Integer]
+ */
+VALUE priority_queue_rbobject__peek( VALUE self ) {
+  PriorityQueue *priority_queue = get_priority_queue_struct( self );
+  return INT2NUM( priority_queue__peek( priority_queue ) );
+}
+
+/* @overload peek_priority( )
+ * Returns value of highest-priority element, but does not remove it from the queue
+ * @return [Float]
+ */
+VALUE priority_queue_rbobject__peek_priority( VALUE self ) {
+  PriorityQueue *priority_queue = get_priority_queue_struct( self );
+  return DBL2NUM( priority_queue__peek_priority( priority_queue ) );
+}
+
+/* @overload peek_payload( )
+ * Returns payoad of highest-priority element, but does not remove it from the queue
+ * @return [Float]
+ */
+VALUE priority_queue_rbobject__peek_payload( VALUE self ) {
+  PriorityQueue *priority_queue = get_priority_queue_struct( self );
+  return INT2NUM( priority_queue__peek_payload( priority_queue ) );
+}
+
 void init_priority_queue_class( ) {
   // PriorityQueue instantiation and class methods
   rb_define_alloc_func( TspKit_PriorityQueue, priority_queue_alloc );
@@ -97,4 +146,11 @@ void init_priority_queue_class( ) {
   // PriorityQueue attributes
   rb_define_method( TspKit_PriorityQueue, "pq_size", priority_queue_rbobject__get_pq_size, 0 );
   rb_define_method( TspKit_PriorityQueue, "heap_root", priority_queue_rbobject__get_heap_root, 0 );
+
+  // PriorityQueue methods (really these are just for testing, PriorityQueue is used internally only)
+  rb_define_method( TspKit_PriorityQueue, "push", priority_queue_rbobject__push, 3 );
+  rb_define_method( TspKit_PriorityQueue, "pop", priority_queue_rbobject__pop, 0 );
+  rb_define_method( TspKit_PriorityQueue, "peek", priority_queue_rbobject__peek, 0 );
+  rb_define_method( TspKit_PriorityQueue, "peek_priority", priority_queue_rbobject__peek_priority, 0 );
+  rb_define_method( TspKit_PriorityQueue, "peek_payload", priority_queue_rbobject__peek_payload, 0 );
 }

@@ -79,7 +79,6 @@ describe TspKit::Utils::PriorityQueue do
         inputs01.each { |args| subject.push(*args) }
 
         expected_outputs01.each do |expected_id, expected_priority, expected_payload|
-          # p [expected_id, expected_priority, expected_payload]
           expect(subject.peek_payload).to eql(expected_payload)
           expect(subject.peek_priority).to eql(expected_priority)
           expect(subject.peek).to eql(expected_id)
@@ -126,7 +125,6 @@ describe TspKit::Utils::PriorityQueue do
         inputs.each { |args| subject.push(*args) }
 
         expected_outputs.each do |expected_id, expected_priority, expected_payload|
-          # p [expected_id, expected_priority, expected_payload]
           expect(subject.peek_payload).to eql(expected_payload)
           expect(subject.peek_priority).to eql(expected_priority)
           expect(subject.peek).to eql(expected_id)

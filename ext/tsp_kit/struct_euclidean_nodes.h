@@ -10,7 +10,7 @@
 
 #include <ruby.h>
 #include "narray.h"
-#include "struct_weight_matrix.h"
+#include "struct_cost_matrix.h"
 
 typedef struct _euclidean_nodes_raw {
   int num_nodes;
@@ -38,6 +38,6 @@ double euclidean_nodes__distance_between( void *nodes_addr, int node_a_id, int n
 
 void euclidean_nodes__all_distances_from( void *nodes_addr, int node_id, double *distances_buffer );
 
-WeightMatrix *euclidean_nodes__create_weight_matrix( EuclideanNodes *nodes );
+CostMatrix *euclidean_nodes__create_cost_matrix( EuclideanNodes *nodes );
 
 #endif

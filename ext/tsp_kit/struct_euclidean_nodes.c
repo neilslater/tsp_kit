@@ -111,16 +111,16 @@ void euclidean_nodes__all_distances_from( void *nodes_addr, int node_id, double 
   return;
 }
 
-WeightMatrix *euclidean_nodes__create_weight_matrix( EuclideanNodes *nodes ) {
-  WeightMatrix *wm;
+CostMatrix *euclidean_nodes__create_cost_matrix( EuclideanNodes *nodes ) {
+  CostMatrix *cm;
   double *w;
   int numn = nodes->num_nodes;
   int numd = nodes->num_dims;
   double *loc = nodes->locations;
 
-  wm = weight_matrix__create();
-  weight_matrix__init( wm, nodes->num_nodes );
-  w = wm->weights;
+  cm = cost_matrix__create();
+  cost_matrix__init( cm, nodes->num_nodes );
+  w = cm->weights;
 
   for( int i = 0; i < (numn-1); i++ ) {
     int node_i_offset = numd * i;
@@ -137,5 +137,5 @@ WeightMatrix *euclidean_nodes__create_weight_matrix( EuclideanNodes *nodes ) {
     }
   }
 
-  return wm;
+  return cm;
 }

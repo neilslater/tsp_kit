@@ -16,8 +16,8 @@ NodeType get_node_type_from_rv( VALUE rv_nodes ) {
     return NODE_EUC;
   }
 
-  if ( TYPE(rv_nodes) == T_DATA && RDATA(rv_nodes)->dfree == (RUBY_DATA_FUNC)weight_matrix__destroy) {
-    return NODE_WM;
+  if ( TYPE(rv_nodes) == T_DATA && RDATA(rv_nodes)->dfree == (RUBY_DATA_FUNC)cost_matrix__destroy) {
+    return NODE_CM;
   }
 
   rb_raise(rb_eArgError, "Unrecognised node subtype");
@@ -30,8 +30,8 @@ DISTANCEFN distance_fn_of( NodeType node_type ) {
   switch(node_type) {
     case NODE_EUC:
       return euclidean_nodes__distance_between;
-    case NODE_WM:
-      return weight_matrix__distance_between;
+    case NODE_CM:
+      return cost_matrix__distance_between;
   }
   return null_distance_fn;
 }
@@ -40,8 +40,8 @@ DISTANCEARRAYFN distance_array_fn_of( NodeType node_type ) {
   switch(node_type) {
     case NODE_EUC:
       return euclidean_nodes__all_distances_from;
-    case NODE_WM:
-      return weight_matrix__all_distances_from;
+    case NODE_CM:
+      return cost_matrix__all_distances_from;
   }
   return null_distance_array_fn;
 }

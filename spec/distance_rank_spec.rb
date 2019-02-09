@@ -138,9 +138,9 @@ describe TspKit::DistanceRank do
         end
       end
 
-      # TODO: Test that we have correct support for WeightMatrix with "missing links"
-      context "with WeightMatrix nodes" do
-        let(:nodes) { NArray.srand(12324124); n = TspKit::Nodes::WeightMatrix.new(6); n.random!; n }
+      # TODO: Test that we have correct support for CostMatrix with "missing links"
+      context "with CostMatrix nodes" do
+        let(:nodes) { NArray.srand(12324124); n = TspKit::Nodes::CostMatrix.new(6); n.random!; n }
         it "ensures that connections are bidirectional" do
           subject.bidirectional( nodes, 4 )
           expect( subject.closest_nodes ).to be_narray_like(
@@ -160,7 +160,7 @@ describe TspKit::DistanceRank do
       context "with one favoured node" do
         let(:nodes) do
           NArray.srand(12324124)
-          n = TspKit::Nodes::WeightMatrix.new(10)
+          n = TspKit::Nodes::CostMatrix.new(10)
           n.random!
           [0,1,2,4,5,6,7,8,9].each do |i|
             n.weights[3,i] = (3+i).to_f/10000

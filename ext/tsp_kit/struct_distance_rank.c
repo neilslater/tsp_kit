@@ -109,7 +109,7 @@ DistanceRank * distance_rank__from_euclidean_nodes( EuclideanNodes *nodes, int m
   return dr;
 }
 
-DistanceRank * distance_rank__from_weight_matrix( WeightMatrix *nodes, int max_rank ) {
+DistanceRank * distance_rank__from_cost_matrix( CostMatrix *nodes, int max_rank ) {
   int dr_offset;
   int *node_ids;
   int num_nodes = nodes->num_nodes;
@@ -126,7 +126,7 @@ DistanceRank * distance_rank__from_weight_matrix( WeightMatrix *nodes, int max_r
 
   for( int i = 0; i < num_nodes; i++ ) {
     dr_offset = max_rank * i;
-    weight_matrix__all_distances_from( nodes, i, distances );
+    cost_matrix__all_distances_from( nodes, i, distances );
     quicksort_ids_by_double( node_ids, distances, 0, num_nodes - 1 );
     memcpy( dr->closest_nodes + dr_offset, node_ids + 1, max_rank * sizeof(int) );
     for( int j = max_rank; j > 0; j-- ) {

@@ -20,7 +20,7 @@ class TspKit::Nodes::Euclidean
   end
 end
 
-class TspKit::Nodes::WeightMatrix
+class TspKit::Nodes::CostMatrix
   # Randomises the weights matrix, useful for tests and random challenges. Note this uses NArray's random
   # so use NArray.srand to set seed values for repeat tests.
   # @param [max] limits defaults to 100.0

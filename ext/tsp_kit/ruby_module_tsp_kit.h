@@ -15,7 +15,7 @@
 #include "shared_helpers.h"
 #include "mt.h"
 #include "ruby_class_euclidean_nodes.h"
-#include "ruby_class_weight_matrix.h"
+#include "ruby_class_cost_matrix.h"
 #include "ruby_class_distance_rank.h"
 #include "ruby_class_solution.h"
 #include "ruby_class_greedy_solver.h"

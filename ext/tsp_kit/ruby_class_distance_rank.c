@@ -2,7 +2,7 @@
 
 #include "ruby_class_distance_rank.h"
 #include "ruby_class_euclidean_nodes.h"
-#include "ruby_class_weight_matrix.h"
+#include "ruby_class_cost_matrix.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -183,15 +183,15 @@ VALUE distance_rank_rbobject__resize( VALUE self, VALUE rv_new_max_rank ) {
 VALUE distance_rank_rbobject__bidirectional( VALUE self, VALUE rv_nodes, VALUE rv_rank_cutoff ) {
   DistanceRank *distance_rank = get_distance_rank_struct( self );
   EuclideanNodes * euc_nodes;
-  WeightMatrix * wm_nodes;
+  CostMatrix * cm_nodes;
   NodeType nodes_type = get_node_type_from_rv( rv_nodes );
 
   switch(nodes_type) {
     case NODE_EUC:
       euc_nodes = get_euclidean_nodes_struct( rv_nodes );
       break;
-    case NODE_WM:
-      wm_nodes = get_weight_matrix_struct( rv_nodes );
+    case NODE_CM:
+      cm_nodes = get_cost_matrix_struct( rv_nodes );
       break;
   }
 
@@ -204,8 +204,8 @@ VALUE distance_rank_rbobject__bidirectional( VALUE self, VALUE rv_nodes, VALUE r
     case NODE_EUC:
       distance_rank__bidirectional( distance_rank, euc_nodes, euclidean_nodes__distance_between, rank_cutoff );
       break;
-    case NODE_WM:
-      distance_rank__bidirectional( distance_rank, wm_nodes, weight_matrix__distance_between, rank_cutoff );
+    case NODE_CM:
+      distance_rank__bidirectional( distance_rank, cm_nodes, cost_matrix__distance_between, rank_cutoff );
       break;
   }
 

@@ -129,7 +129,7 @@ VALUE TspKit = Qnil;
 
 VALUE TspKit_Nodes = Qnil;
 VALUE TspKit_EuclideanNodes = Qnil;
-VALUE TspKit_WeightMatrix = Qnil;
+VALUE TspKit_CostMatrix = Qnil;
 
 VALUE TspKit_DistanceRank = Qnil;
 
@@ -146,7 +146,7 @@ void init_module_tsp_kit() {
   // Node types
   TspKit_Nodes = rb_define_class_under( TspKit, "Nodes", rb_cObject );
   TspKit_EuclideanNodes = rb_define_class_under( TspKit_Nodes, "Euclidean", rb_cObject );
-  TspKit_WeightMatrix = rb_define_class_under( TspKit_Nodes, "WeightMatrix", rb_cObject );
+  TspKit_CostMatrix = rb_define_class_under( TspKit_Nodes, "CostMatrix", rb_cObject );
 
   // Utilities
   TspKit_Utils = rb_define_class_under( TspKit, "Utils", rb_cObject );
@@ -169,7 +169,7 @@ void init_module_tsp_kit() {
   rb_define_singleton_method( TspKit, "quicksort_ints", rbmodule__quicksort_ints, 1 );
 
   init_euclidean_nodes_class();
-  init_weight_matrix_class();
+  init_cost_matrix_class();
   init_distance_rank_class();
   init_solution_class();
   init_greedy_solver_class();

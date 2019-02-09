@@ -10,7 +10,7 @@
 
 #include <ruby.h>
 #include "narray.h"
-#include "struct_weight_matrix.h"
+#include "struct_cost_matrix.h"
 #include "struct_euclidean_nodes.h"
 #include "utilities.h"
 
@@ -22,7 +22,7 @@ typedef double (*DISTANCEFN)(void*, int, int);
 
 typedef void (*DISTANCEARRAYFN)(void*, int, double*);
 
-typedef enum node_subclass {NODE_EUC, NODE_WM} NodeType;
+typedef enum node_subclass {NODE_EUC, NODE_CM} NodeType;
 
 NodeType get_node_type_from_rv( VALUE rv_nodes );
 

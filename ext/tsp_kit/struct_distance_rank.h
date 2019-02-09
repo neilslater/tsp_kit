@@ -37,7 +37,7 @@ DistanceRank * distance_rank__clone( DistanceRank *distance_rank_orig );
 
 DistanceRank * distance_rank__from_euclidean_nodes( EuclideanNodes *nodes, int max_rank );
 
-DistanceRank * distance_rank__from_weight_matrix( WeightMatrix *nodes, int max_rank );
+DistanceRank * distance_rank__from_cost_matrix( CostMatrix *nodes, int max_rank );
 
 void distance_rank__resize( DistanceRank *distance_rank, int new_max_rank );
 

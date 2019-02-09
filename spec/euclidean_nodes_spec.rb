@@ -137,7 +137,7 @@ describe TspKit::Nodes::Euclidean do
       end
     end
 
-    describe "#to_weight_matrix" do
+    describe "#to_cost_matrix" do
       subject { TspKit::Nodes::Euclidean.new(6, 3) }
 
       before :each do
@@ -146,10 +146,10 @@ describe TspKit::Nodes::Euclidean do
       end
 
       it "returns a weight matrix of all distances" do
-        wm = subject.to_weight_matrix
-        expect( wm ).to be_a TspKit::Nodes::WeightMatrix
+        cm = subject.to_cost_matrix
+        expect( cm ).to be_a TspKit::Nodes::CostMatrix
 
-        expect( wm.weights ).to be_narray_like(
+        expect( cm.weights ).to be_narray_like(
           NArray[
             [ 0.000000, 65.414892, 69.636629, 59.594620, 59.034899, 73.764380],
             [65.414892,  0.000000, 68.040486, 89.214107, 86.305504, 55.552064],

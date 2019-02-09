@@ -1,20 +1,20 @@
 require 'helpers'
 
-describe TspKit::Nodes::WeightMatrix do
+describe TspKit::Nodes::CostMatrix do
   describe "class methods" do
     describe "#new" do
       it "creates an object of the correct type" do
-        expect( TspKit::Nodes::WeightMatrix.new(10) ).to be_a TspKit::Nodes::WeightMatrix
+        expect( TspKit::Nodes::CostMatrix.new(10) ).to be_a TspKit::Nodes::CostMatrix
       end
 
       it "does not create anything if number of nodes is out of bounds" do
-        expect { TspKit::Nodes::WeightMatrix.new( 0 ) }.to raise_error ArgumentError
-        expect { TspKit::Nodes::WeightMatrix.new( -10 ) }.to raise_error ArgumentError
-        expect { TspKit::Nodes::WeightMatrix.new( 100000 ) }.to raise_error ArgumentError
+        expect { TspKit::Nodes::CostMatrix.new( 0 ) }.to raise_error ArgumentError
+        expect { TspKit::Nodes::CostMatrix.new( -10 ) }.to raise_error ArgumentError
+        expect { TspKit::Nodes::CostMatrix.new( 100000 ) }.to raise_error ArgumentError
       end
 
       it "creates a default weights array" do
-        nodes = TspKit::Nodes::WeightMatrix.new( 10 )
+        nodes = TspKit::Nodes::CostMatrix.new( 10 )
         weights = nodes.weights
         expect( weights ).to be_a NArray
         expect( weights.shape ).to eql [10, 10]
@@ -23,18 +23,18 @@ describe TspKit::Nodes::WeightMatrix do
 
     describe "#from_data" do
       it "creates an object of the correct type" do
-        expect( TspKit::Nodes::WeightMatrix.from_data(
+        expect( TspKit::Nodes::CostMatrix.from_data(
           [
             [0.0, 2.0, 3.0],
             [2.0, 0.0, 1.5],
             [3.0, 1.5, 0.0]
           ]
-        ) ).to be_a TspKit::Nodes::WeightMatrix
+        ) ).to be_a TspKit::Nodes::CostMatrix
       end
 
       it "raises an error if weights array is not symmetric" do
         expect{
-          TspKit::Nodes::WeightMatrix.from_data(
+          TspKit::Nodes::CostMatrix.from_data(
             [
               [0.0, 2.0, 3.0],
               [2.0, 0.0, 1.5],
@@ -46,7 +46,7 @@ describe TspKit::Nodes::WeightMatrix do
 
       it "raises an error if weights array is not right shape" do
         expect{
-          TspKit::Nodes::WeightMatrix.from_data(
+          TspKit::Nodes::CostMatrix.from_data(
             [
               [0.0, 2.0, 3.0],
               [2.0, 0.0, 1.5]
@@ -56,7 +56,7 @@ describe TspKit::Nodes::WeightMatrix do
       end
 
       it "stores supplied values as locations" do
-        nodes = TspKit::Nodes::WeightMatrix.from_data(
+        nodes = TspKit::Nodes::CostMatrix.from_data(
           [
             [0.0, 2.0, 3.0],
             [2.0, 0.0, 1.5],
@@ -71,10 +71,10 @@ describe TspKit::Nodes::WeightMatrix do
 
     describe "#load" do
       it "instantiates correctly from a file" do
-        filename = File.join(__dir__, 'test_weight_matrix_01.dat')
-        nodes = TspKit::Nodes::WeightMatrix.load( filename )
+        filename = File.join(__dir__, 'test_cost_matrix_01.dat')
+        nodes = TspKit::Nodes::CostMatrix.load( filename )
 
-        expect( nodes ).to be_a TspKit::Nodes::WeightMatrix
+        expect( nodes ).to be_a TspKit::Nodes::CostMatrix
 
         expect( nodes.num_nodes ).to eql 3
         expect( nodes.weights[0..2, 1].to_a ).to eql [2.0, 0.0, 1.5]
@@ -83,8 +83,8 @@ describe TspKit::Nodes::WeightMatrix do
   end
 
   describe "instance methods" do
-    let( :test_filename ) { File.join(__dir__, 'test_weight_matrix_01.dat') }
-    subject { TspKit::Nodes::WeightMatrix.load( test_filename ) }
+    let( :test_filename ) { File.join(__dir__, 'test_cost_matrix_01.dat') }
+    subject { TspKit::Nodes::CostMatrix.load( test_filename ) }
 
     describe "#clone" do
       it "copies everything" do
@@ -101,7 +101,7 @@ describe TspKit::Nodes::WeightMatrix do
     end
 
     describe "#distance_between" do
-      subject { TspKit::Nodes::WeightMatrix.new(10) }
+      subject { TspKit::Nodes::CostMatrix.new(10) }
 
       before :each do
         NArray.srand(12324124)
@@ -130,7 +130,7 @@ describe TspKit::Nodes::WeightMatrix do
     end
 
     describe "#all_distances_from" do
-      subject { TspKit::Nodes::WeightMatrix.new(10) }
+      subject { TspKit::Nodes::CostMatrix.new(10) }
 
       before :each do
         NArray.srand(12324124)
@@ -149,7 +149,7 @@ describe TspKit::Nodes::WeightMatrix do
     end
 
     describe "#to_distance_rank" do
-      subject { TspKit::Nodes::WeightMatrix.new(10) }
+      subject { TspKit::Nodes::CostMatrix.new(10) }
 
       before :each do
         NArray.srand(12324124)

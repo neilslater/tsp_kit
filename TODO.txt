@@ -16,5 +16,6 @@
 Later:
 
 DistanceRank:
+  * Test balancing DRs using bidirectional works correctly with broken links
   * Validate that all ids are within bounds
   * Store that the DR is "balanced"

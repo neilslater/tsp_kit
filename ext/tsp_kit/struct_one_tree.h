@@ -34,14 +34,14 @@ typedef struct _one_tree_raw {
 
 OneTree *one_tree__create();
 
-void one_tree__init( OneTree *one_tree, int num_nodes );
+void one_tree__init( OneTree *tree, int num_nodes );
 
-void one_tree__destroy( OneTree *one_tree );
+void one_tree__destroy( OneTree *tree );
 
-void one_tree__gc_mark( OneTree *one_tree );
+void one_tree__gc_mark( OneTree *tree );
 
-void one_tree__deep_copy( OneTree *one_tree_copy, OneTree *one_tree_orig );
+void one_tree__deep_copy( OneTree *tree_copy, OneTree *tree_orig );
 
-OneTree *one_tree__clone( OneTree *one_tree_orig );
+OneTree *one_tree__clone( OneTree *tree_orig );
 
 #endif

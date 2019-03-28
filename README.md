@@ -15,18 +15,13 @@ http://akira.ruc.dk/~keld/research/LKH/LKH-2.0/DOC/LKH_REPORT.pdf
 
  * Install dependencies:
 
-
     $ bundle install
-
 
  * Compile and test:
 
-
     $ bundle exec rake
 
-
 This should compile the C code, and run the unit tests.
-
 
 ## Contributing
 

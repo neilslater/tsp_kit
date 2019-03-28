@@ -35,8 +35,7 @@ class TspKit::File::TspLib
     nodes = TspKit::Nodes::Euclidean.new( dimension, 2 )
     locations = nodes.locations
     dimension.times do |i|
-      coords = node_coords[i+1]
-      locations[0..1, i] = coords
+      locations[0..1, i] = node_coords[i+1]
     end
     nodes
   end

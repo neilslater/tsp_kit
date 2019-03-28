@@ -13,8 +13,6 @@
  * TspKit::Solver::Greedy
   * Input TspKit::Nodes, TspKit::DistanceRank, output TspKit::Solution
 
-
-
 Later:
 
 DistanceRank:

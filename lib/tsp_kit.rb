@@ -6,3 +6,4 @@ require "tsp_kit/startup"
 require "tsp_kit/version"
 require 'tsp_kit/solver'
 require 'tsp_kit/nodes'
+require 'tsp_kit/tsplib_format'

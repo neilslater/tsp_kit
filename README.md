@@ -1,18 +1,11 @@
 # TspKit
 
-Ruby skeleton solver for Kaggle Christmas competitions e.g. *Helping Santa's Helpers*
-from December 2014.
+TspKit is a set of utility classes for approximately solving Travelling Salesman Problem data sets, and
+related problems.
 
-For competition details, and problem data (which you will need to fetch separately to run this code),
-see e.g. http://www.kaggle.com/c/helping-santas-helpers
-
-This is not a fully functional library. You can use this code as a project template for data optimisation
-competitions. To do so requires good knowledge of Ruby with native extensions in C.
-
-The project template includes some implementations in C of algorithms that might be useful for a
-Kaggle competition:
-
- * Mersenne Twister PRNG. Although this is available in core Ruby, it can be more efficient to use the C lib directly.
+The main solver is inspired by "An Effective Implementation of the
+Lin-Kernighan Traveling Salesman Heuristic" by Keld Helsgaun, which can be found at
+http://akira.ruc.dk/~keld/research/LKH/LKH-2.0/DOC/LKH_REPORT.pdf
 
 ## Installation
 
@@ -26,17 +19,13 @@ Kaggle competition:
     $ bundle install
 
 
- * Place a copy of ```data.csv``` in the ```data``` folder.
-
- * Compile, import, test and run:
+ * Compile and test:
 
 
     $ bundle exec rake
 
 
-This should compile the C code, import the problem data from the CSV file (into Ruby's NArray
-format), run the unit tests, and then run the default solution. The process should take
-around XX minutes in total. The output is saved to ```data/submission.csv```.
+This should compile the C code, and run the unit tests.
 
 
 ## Contributing

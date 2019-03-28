@@ -104,9 +104,9 @@ class TspKit::File::TspLib
 
     def parse_node_coord_line text, hash
       nc = (hash['NODE_COORDS'] ||= {})
-      vals = text.strip.split(/\s+/).map(&:to_i) # TSPLIB uses integers throughout
-      id = vals.shift
-      nc[id] = vals
+      vals = text.strip.split(/\s+/)
+      id = vals.shift.to_i
+      nc[id] = vals.map(&:to_f)
     end
   end
 

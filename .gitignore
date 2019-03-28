@@ -9,7 +9,6 @@
 /tmp
 
 /data/*.csv
-/data/*.dat
 submissions
 external_submissions
 reports

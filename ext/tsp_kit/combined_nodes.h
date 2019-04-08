@@ -5,8 +5,8 @@
 //  Some helper functions for handling switching between Nodes subclasses
 //
 
-#ifndef STRUCT_COMBINED_NODES_H
-#define STRUCT_COMBINED_NODES_H
+#ifndef COMBINED_NODES_H
+#define COMBINED_NODES_H
 
 #include <ruby.h>
 #include "narray.h"

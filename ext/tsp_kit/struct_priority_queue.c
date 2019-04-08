@@ -159,7 +159,7 @@ int priority_queue__merge( PriorityQueue *pq, int a_id, int b_id ) {
 }
 
 int priority_queue__delete_min( PriorityQueue *pq ) {
-  int old_min, sibling_id, n_root_candidates, n_first_pass_roots, next_id;
+  int old_min, sibling_id, n_root_candidates, n_first_pass_roots;
 
   if ( pq->heap_root < 0 ) {
     return -1;

@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'helpers'
 
 describe TspKit::File::TspLib do
-  describe ".read_file" do
+  describe '.read_file' do
     context "'a280.tsp'" do
       let(:path) { File.join(__dir__, '..', 'data', 'a280.tsp') }
       subject { TspKit::File::TspLib.read_file(path) }

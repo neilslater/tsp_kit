@@ -1,22 +1,23 @@
-class TspKit::Solver
+# frozen_string_literal: true
 
-  def initialize opts = {}
-    set_opts( opts )
-  end
+module TspKit
+  class Solver
+    def initialize(opts = {})
+      set_opts(opts)
+    end
 
-  def run
-    raise NotImplementedError
-  end
+    def run
+      raise NotImplementedError
+    end
 
-  def self.default_opts
-    Hash[
-      :example => 0
-    ]
-  end
+    def self.default_opts
+      { example: 0 }
+    end
 
-  private
+    private
 
-  def set_opts opts
-    @opts = self.class.default_opts.merge( opts )
+    def set_opts(opts)
+      @opts = self.class.default_opts.merge(opts)
+    end
   end
 end

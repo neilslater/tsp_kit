@@ -15,11 +15,12 @@ Gem::Specification.new do |spec|
   DESCRIPTION
   spec.homepage = 'https://github.com/neilslater/tsp_kit'
   spec.license = 'MIT'
-  spec.required_ruby_version = '>= 4.0', '< 4.1'
+  spec.required_ruby_version = '>= 3.3', '< 4.1'
 
   spec.metadata = {
     'homepage_uri' => spec.homepage,
-    'source_code_uri' => "#{spec.homepage}/tree/main"
+    'source_code_uri' => "#{spec.homepage}/tree/main",
+    'rubygems_mfa_required' => 'true'
   }
 
   spec.files = Dir[

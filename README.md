@@ -9,7 +9,7 @@ http://akira.ruc.dk/~keld/research/LKH/LKH-2.0/DOC/LKH_REPORT.pdf
 
 ## Installation
 
-TspKit currently targets Ruby 4.0.6 and uses
+TspKit supports Ruby 3.3, 3.4, and 4.0, and uses
 [`numo-narray-alt`](https://rubygems.org/gems/numo-narray-alt) 0.10.5.
 A C compiler and the normal Ruby native-extension build tools are required.
 

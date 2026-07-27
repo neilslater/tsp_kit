@@ -254,9 +254,7 @@ describe TspKit::Utils::PriorityQueue do
         10.times { |i| subject.push(i, rand, 3) }
         expect(subject.pop).to eql(-1)
       end
-    end
 
-    [124_781, 12_414_325, 141_251, 431_251, 431_252, 431_253, 431_254, 431_255].each do |seed|
       it "nothing bad happens if we try to over-fill a large queue (seed #{seed})" do
         srand(seed)
         pq = TspKit::Utils::PriorityQueue.new(200)

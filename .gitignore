@@ -19,6 +19,8 @@ backbone
 *.bundle
 .config
 coverage
+doc
+.yardoc
 InstalledFiles
 lib/bundler/man
 pkg

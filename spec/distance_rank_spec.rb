@@ -88,7 +88,12 @@ describe TspKit::DistanceRank do
     end
 
     describe '#resize' do
-      let(:nodes) { Numo::NArray.srand(12_324_124); n = TspKit::Nodes::Euclidean.new(6, 3); n.random!; n }
+      let(:nodes) do
+        Numo::NArray.srand(12_324_124)
+        n = TspKit::Nodes::Euclidean.new(6, 3)
+        n.random!
+        n
+      end
       subject { nodes.to_distance_rank(4) }
 
       it 'can reduce number of closest items stored' do
@@ -111,7 +116,12 @@ describe TspKit::DistanceRank do
       subject { nodes.to_distance_rank(4) }
 
       context 'with Euclidean nodes' do
-        let(:nodes) { Numo::NArray.srand(12_324_124); n = TspKit::Nodes::Euclidean.new(6, 3); n.random!; n }
+        let(:nodes) do
+          Numo::NArray.srand(12_324_124)
+          n = TspKit::Nodes::Euclidean.new(6, 3)
+          n.random!
+          n
+        end
         it 'ensures that connections are bidirectional' do
           subject.bidirectional(nodes, 2)
           expect_bidirectional_connections(subject)
@@ -121,7 +131,12 @@ describe TspKit::DistanceRank do
 
       # TODO: Test that we have correct support for CostMatrix with "missing links"
       context 'with CostMatrix nodes' do
-        let(:nodes) { Numo::NArray.srand(12_324_124); n = TspKit::Nodes::CostMatrix.new(6); n.random!; n }
+        let(:nodes) do
+          Numo::NArray.srand(12_324_124)
+          n = TspKit::Nodes::CostMatrix.new(6)
+          n.random!
+          n
+        end
         it 'ensures that connections are bidirectional' do
           subject.bidirectional(nodes, 4)
           expect_bidirectional_connections(subject)

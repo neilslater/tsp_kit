@@ -165,7 +165,7 @@ describe TspKit::Nodes::CostMatrix do
 
         10.times do |node_id|
           expected = (0...10).reject { |id| id == node_id }
-                            .sort_by { |id| subject.weights[node_id, id] }.first(7)
+                             .sort_by { |id| subject.weights[node_id, id] }.first(7)
           expect(dr.closest_nodes[node_id, true].to_a).to eql expected
         end
       end

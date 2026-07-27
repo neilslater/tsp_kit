@@ -17,7 +17,7 @@ module TspKit
         offsets = limits.map(&:first)
         sizes = limits.map { |l| l.last - l.first }
 
-        locations[] = locations.rand * sizes + offsets
+        locations[] = (locations.rand * sizes) + offsets
       end
     end
   end
@@ -28,7 +28,7 @@ module TspKit
     class CostMatrix
       # Randomises the weights using Numo's random number generator.
       # Use Numo::NArray.srand to set repeatable seed values.
-      # @param [max] limits defaults to 100.0
+      # @param max [Numeric] exclusive upper bound for generated weights
       # @return [Numo::DFloat] altered weights table
       def random!(max = 100.0)
         weights[] = weights.rand * (max / 2)

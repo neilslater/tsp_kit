@@ -72,6 +72,23 @@ describe TspKit::Nodes::Euclidean do
   describe 'instance methods' do
     subject { TspKit::Nodes::Euclidean.from_data([[1, 2], [25, 15], [0, 0]]) }
 
+    describe '#random!' do
+      it 'accepts one range per dimension' do
+        subject.random!([10.0..20.0, -5.0..5.0])
+
+        expect(subject.locations[true, 0].min).to be_between(10.0, 20.0)
+        expect(subject.locations[true, 1].min).to be_between(-5.0, 5.0)
+      end
+
+      it 'rejects the wrong number of ranges' do
+        expect { subject.random!([0.0..1.0]) }.to raise_error(ArgumentError)
+      end
+
+      it 'rejects ranges whose lower bound is not numeric' do
+        expect { subject.random!(['a'..'z', 0.0..1.0]) }.to raise_error(ArgumentError)
+      end
+    end
+
     describe '#clone' do
       it 'copies everything' do
         copy = subject.clone
@@ -105,7 +122,7 @@ describe TspKit::Nodes::Euclidean do
         it "matches distances calculated in Ruby for #{dim}D locations" do
           nodes = TspKit::Nodes::Euclidean.new(10, dim)
           [*0..4].zip([*5..9]).each do |a_id, b_id|
-              delta = nodes.locations[a_id, 0..(dim - 1)] - nodes.locations[b_id, 0..(dim - 1)]
+            delta = nodes.locations[a_id, 0..(dim - 1)] - nodes.locations[b_id, 0..(dim - 1)]
             expected_distance = Math.sqrt((delta * delta).sum)
             expect(nodes.distance_between(a_id, b_id)).to be_within(1e-8).of expected_distance
           end
@@ -172,7 +189,7 @@ describe TspKit::Nodes::Euclidean do
 
         6.times do |node_id|
           expected = (0...6).reject { |id| id == node_id }
-                           .sort_by { |id| subject.distance_between(node_id, id) }.first(4)
+                            .sort_by { |id| subject.distance_between(node_id, id) }.first(4)
           expect(dr.closest_nodes[node_id, true].to_a).to eql expected
         end
       end

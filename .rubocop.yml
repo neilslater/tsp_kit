@@ -1,13 +1,66 @@
 AllCops:
-  TargetRubyVersion: 2.7.1
   NewCops: enable
+  TargetRubyVersion: 3.3
+  Exclude:
+    - "pkg/**/*"
+    - "tmp/**/*"
+  SuggestExtensions: false
+
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+    - "tsp_kit.gemspec"
+
+Metrics/ModuleLength:
+  Exclude:
+    - "spec/**/*"
+
+Style/Documentation:
+  Enabled: false
+
+# Native-extension setup uses mkmf's required global configuration variables.
+Style/GlobalVars:
+  Exclude:
+    - "ext/tsp_kit/extconf.rb"
+
+# These files intentionally reopen native classes to add cohesive Ruby behavior.
+Style/OneClassPerFile:
+  Exclude:
+    - "lib/tsp_kit/marshal_support.rb"
+    - "lib/tsp_kit/nodes.rb"
+    - "lib/tsp_kit/tsplib_format.rb"
+
+# Marshal is the explicit persistence format; callers must load trusted files only.
+Security/MarshalLoad:
+  Exclude:
+    - "lib/tsp_kit/marshal_support.rb"
+
+Metrics/AbcSize:
+  Exclude:
+    - "lib/tsp_kit/nodes.rb"
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - "lib/tsp_kit/nodes.rb"
+
+Metrics/MethodLength:
+  Exclude:
+    - "lib/tsp_kit/tsplib_format.rb"
+
+Naming/AccessorMethodName:
+  Exclude:
+    - "lib/tsp_kit/solver.rb"
+    - "lib/tsp_kit/tsplib_format.rb"
+
+Naming/MethodParameterName:
+  AllowedNames:
+    - h
 
 Layout/LineLength:
-  Max: 120
-  
-Metrics/BlockLength:
-  ExcludedMethods:
-    - context
-    - describe
-    - shared_examples
+  Exclude:
+    - "spec/priority_queue_spec.rb"
 
+# This file contains documentation-only declarations and is never required.
+Lint/EmptyClass:
+  Exclude:
+    - "lib/tsp_kit/api_docs.rb"

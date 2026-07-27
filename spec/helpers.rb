@@ -42,7 +42,7 @@ end
 def expect_bidirectional_connections(distance_rank)
   rows = distance_rank.closest_nodes.to_a
   rows.each_with_index do |connections, node_id|
-    connections.reject { |other_id| other_id.negative? }.each do |other_id|
+    connections.reject(&:negative?).each do |other_id|
       expect(rows[other_id]).to include(node_id)
     end
   end

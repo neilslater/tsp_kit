@@ -8,8 +8,15 @@
 //  struct_greedy_solver.c
 //
 
+static const rb_data_type_t greedy_solver_data_type = {
+  "TspKit::GreedySolver",
+  { (RUBY_DATA_FUNC)greedy_solver__gc_mark, (RUBY_DATA_FUNC)greedy_solver__destroy, NULL, NULL,
+    { NULL } },
+  NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 VALUE greedy_solver_as_ruby_class( GreedySolver *greedy_solver , VALUE klass ) {
-  return Data_Wrap_Struct( klass, greedy_solver__gc_mark, greedy_solver__destroy, greedy_solver );
+  return TypedData_Wrap_Struct( klass, &greedy_solver_data_type, greedy_solver );
 }
 
 VALUE greedy_solver_alloc(VALUE klass) {
@@ -18,13 +25,12 @@ VALUE greedy_solver_alloc(VALUE klass) {
 
 GreedySolver *get_greedy_solver_struct( VALUE obj ) {
   GreedySolver *greedy_solver;
-  Data_Get_Struct( obj, GreedySolver, greedy_solver );
+  TypedData_Get_Struct( obj, GreedySolver, &greedy_solver_data_type, greedy_solver );
   return greedy_solver;
 }
 
 void assert_value_wraps_greedy_solver( VALUE obj ) {
-  if ( TYPE(obj) != T_DATA ||
-      RDATA(obj)->dfree != (RUBY_DATA_FUNC)greedy_solver__destroy) {
+  if (!rb_typeddata_is_kind_of(obj, &greedy_solver_data_type)) {
     rb_raise( rb_eTypeError, "Expected a GreedySolver object, but got something else" );
   }
 }

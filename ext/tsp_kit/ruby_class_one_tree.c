@@ -8,8 +8,15 @@
 //  struct_one_tree.c
 //
 
+static const rb_data_type_t one_tree_data_type = {
+  "TspKit::OneTree",
+  { (RUBY_DATA_FUNC)one_tree__gc_mark, (RUBY_DATA_FUNC)one_tree__destroy, NULL,
+    (RUBY_DATA_FUNC)one_tree__gc_compact, { NULL } },
+  NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 VALUE one_tree_as_ruby_class( OneTree *one_tree , VALUE klass ) {
-  return Data_Wrap_Struct( klass, one_tree__gc_mark, one_tree__destroy, one_tree );
+  return TypedData_Wrap_Struct( klass, &one_tree_data_type, one_tree );
 }
 
 VALUE one_tree_alloc(VALUE klass) {
@@ -18,13 +25,12 @@ VALUE one_tree_alloc(VALUE klass) {
 
 OneTree *get_one_tree_struct( VALUE obj ) {
   OneTree *one_tree;
-  Data_Get_Struct( obj, OneTree, one_tree );
+  TypedData_Get_Struct( obj, OneTree, &one_tree_data_type, one_tree );
   return one_tree;
 }
 
 void assert_value_wraps_one_tree( VALUE obj ) {
-  if ( TYPE(obj) != T_DATA ||
-      RDATA(obj)->dfree != (RUBY_DATA_FUNC)one_tree__destroy) {
+  if (!rb_typeddata_is_kind_of(obj, &one_tree_data_type)) {
     rb_raise( rb_eTypeError, "Expected a OneTree object, but got something else" );
   }
 }
@@ -79,7 +85,7 @@ VALUE one_tree_rbobject__get_num_nodes( VALUE self ) {
 
 /* @!attribute [r] node_penalties
  * Description goes here
- * @return [NArray<float>]
+ * @return [Numo::DFloat]
  */
 VALUE one_tree_rbobject__get_narr_node_penalties( VALUE self ) {
   OneTree *one_tree = get_one_tree_struct( self );
@@ -88,7 +94,7 @@ VALUE one_tree_rbobject__get_narr_node_penalties( VALUE self ) {
 
 /* @!attribute [r] node_ids
  * Description goes here
- * @return [NArray<int>]
+ * @return [Numo::Int32]
  */
 VALUE one_tree_rbobject__get_narr_node_ids( VALUE self ) {
   OneTree *one_tree = get_one_tree_struct( self );
@@ -97,7 +103,7 @@ VALUE one_tree_rbobject__get_narr_node_ids( VALUE self ) {
 
 /* @!attribute [r] parents
  * Description goes here
- * @return [NArray<int>]
+ * @return [Numo::Int32]
  */
 VALUE one_tree_rbobject__get_narr_parents( VALUE self ) {
   OneTree *one_tree = get_one_tree_struct( self );

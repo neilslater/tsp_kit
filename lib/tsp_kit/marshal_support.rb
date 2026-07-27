@@ -1,64 +1,58 @@
 # frozen_string_literal: true
 
-require 'narray'
-
-# TspKit adds support for Marshal to NArray.
-# Code originally from http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/194510
-class NArray
-  def _dump(*_ignored)
-    Marshal.dump typecode: typecode, shape: shape, data: to_s
-  end
-
-  def self._load(buf)
-    h = Marshal.load buf
-    typecode = h[:typecode]
-    shape = h[:shape]
-    data = h[:data]
-    to_na data, typecode, *shape
-  end
-
-  def save(filename)
-    File.open(filename, 'wb') { |file| Marshal.dump(self, file) }
-  end
-
-  def self.load(filename)
-    File.open(filename, 'rb') { |file| Marshal.load(file) }
-  end
-end
+require 'numo/narray/alt'
 
 module TspKit
+  # Adds trusted-file Marshal persistence to Numo-backed native objects.
   module MarshalSupport
     # @!visibility private
     def _dump(*_ignored)
       Marshal.dump to_h
     end
 
+    # Saves this object using Ruby's Marshal format.
+    #
+    # Only load files from trusted sources; Marshal is not safe for untrusted
+    # input.
+    # @param filename [String] destination path
+    # @return [void]
     def save(filename)
-      File.open(filename, 'wb') { |file| Marshal.dump(self, file) }
+      ::File.open(filename, 'wb') { |file| Marshal.dump(self, file) }
     end
 
+    # Extends including classes with the matching load helpers.
+    # @param base [Class] including class
+    # @return [void]
     def self.included(base)
       base.extend(ClassMethods)
     end
 
+    # Class-level reconstruction helpers for Marshal persistence.
     module ClassMethods
       # @!visibility private
-      def _load(buf)
-        h = Marshal.load buf
-        from_h h
+      def _load(buffer)
+        attributes = Marshal.load buffer
+        from_h attributes
       end
 
+      # Loads an object previously written by {MarshalSupport#save}.
+      #
+      # Only load files from trusted sources; Marshal can execute attacker-
+      # controlled object hooks.
+      # @param filename [String] trusted source path
+      # @return [Object] reconstructed TspKit object
       def load(filename)
-        File.open(filename, 'rb') { |file| Marshal.load(file) }
+        ::File.open(filename, 'rb') { |file| Marshal.load(file) }
       end
     end
   end
 end
 
 module TspKit
-  module Nodes
+  class Nodes
     class Euclidean
       include TspKit::MarshalSupport
+
       # @!visibility private
       # Adds support for Marshal, via to_h and from_h methods
       def to_h
@@ -67,19 +61,20 @@ module TspKit
 
       # @!visibility private
       # Constructs a TspKit::Nodes::Euclidean from hash description. Used internally to support Marshal.
-      # @param [Hash] h Keys are :locations
+      # @param attributes [Hash] keys are `:locations`
       # @return [TspKit::Nodes::Euclidean] new object
-      def self.from_h(h)
-        TspKit::Nodes::Euclidean.from_data(h[:locations])
+      def self.from_h(attributes)
+        TspKit::Nodes::Euclidean.from_data(attributes[:locations])
       end
     end
   end
 end
 
 module TspKit
-  module Nodes
+  class Nodes
     class CostMatrix
       include TspKit::MarshalSupport
+
       # @!visibility private
       # Adds support for Marshal, via to_h and from_h methods
       def to_h
@@ -88,10 +83,10 @@ module TspKit
 
       # @!visibility private
       # Constructs a TspKit::Nodes::CostMatrix from hash description. Used internally to support Marshal.
-      # @param [Hash] h Keys are :weights
+      # @param attributes [Hash] keys are `:weights`
       # @return [TspKit::Nodes::CostMatrix] new object
-      def self.from_h(h)
-        TspKit::Nodes::CostMatrix.from_data(h[:weights])
+      def self.from_h(attributes)
+        TspKit::Nodes::CostMatrix.from_data(attributes[:weights])
       end
     end
   end
@@ -100,6 +95,7 @@ end
 module TspKit
   class DistanceRank
     include TspKit::MarshalSupport
+
     # @!visibility private
     # Adds support for Marshal, via to_h and from_h methods
     def to_h
@@ -108,10 +104,10 @@ module TspKit
 
     # @!visibility private
     # Constructs a TspKit::DistanceRankfrom hash description. Used internally to support Marshal.
-    # @param [Hash] h Keys are :closest_nodes
+    # @param attributes [Hash] keys are `:closest_nodes`
     # @return [TspKit::DistanceRank] new object
-    def self.from_h(h)
-      TspKit::DistanceRank.from_data(h[:closest_nodes])
+    def self.from_h(attributes)
+      TspKit::DistanceRank.from_data(attributes[:closest_nodes])
     end
   end
 end

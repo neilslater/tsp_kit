@@ -9,7 +9,7 @@
 #define STRUCT_GREEDY_SOLVER_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 
 typedef struct _greedy_solver_raw {
   int num_nodes;

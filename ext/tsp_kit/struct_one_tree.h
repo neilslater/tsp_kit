@@ -11,7 +11,7 @@
 #include <float.h>
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "combined_nodes.h"
 
 typedef struct _one_tree_raw {
@@ -50,6 +50,7 @@ void one_tree__init( OneTree *tree, int num_nodes );
 void one_tree__destroy( OneTree *tree );
 
 void one_tree__gc_mark( OneTree *tree );
+void one_tree__gc_compact( OneTree *tree );
 
 void one_tree__deep_copy( OneTree *tree_copy, OneTree *tree_orig );
 

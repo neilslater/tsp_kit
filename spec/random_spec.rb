@@ -4,11 +4,8 @@ require 'helpers'
 
 describe TspKit do
   describe 'random number generator' do
-    it 'does not use the default mt.c seed when loaded' do
-      # Run in a separate process in order to get library loaded with initial state
-      script_output = `ruby -Ilib -e "require 'tsp_kit'; puts TspKit.rand"`
-      got_num = script_output.chomp.to_f
-      expect(got_num).to_not be_within(1e-8).of 0.3147237002849579
+    it 'seeds its native state when loaded' do
+      expect(described_class).to be_rng_seeded
     end
 
     it 'generates numbers consistently when seeded' do
@@ -20,8 +17,8 @@ describe TspKit do
       ]
 
       inputs.each do |seed, expected_results|
-        TspKit.srand(seed)
-        got_results = expected_results.map { |_e| TspKit.rand }
+        described_class.srand(seed)
+        got_results = expected_results.map { |_e| described_class.rand }
         got_results.zip(expected_results).each do |got_val, expected_val|
           expect(got_val).to be_within(1e-6).of expected_val
         end
@@ -38,8 +35,8 @@ describe TspKit do
       ]
 
       inputs.each do |seed, expected_results|
-        TspKit.srand_array(seed)
-        got_results = expected_results.map { |_e| TspKit.rand }
+        described_class.srand_array(seed)
+        got_results = expected_results.map { |_e| described_class.rand }
         got_results.zip(expected_results).each do |got_val, expected_val|
           expect(got_val).to be_within(1e-6).of expected_val
         end
@@ -52,13 +49,13 @@ describe TspKit do
       inputs = [
         [0, [2.051102, 1.353689, -0.978547, 1.454275, -1.338440, 1.661093, -1.429422, 2.040621, 0.284341]],
         [830, [0.200539, 0.212403, 1.209253, 0.216380, -0.912048, -1.794705, -0.394491, 1.156624]],
-        [7685, [-0.984045,  0.159842, 0.587212, 0.008777, -1.644188, -0.253400, -2.566122, -1.663499, 0.493266]],
+        [7685, [-0.984045, 0.159842, 0.587212, 0.008777, -1.644188, -0.253400, -2.566122, -1.663499, 0.493266]],
         [7684, [0.944384, 0.057058, 0.068674, 1.035382, -0.436135, -1.138316, -1.003699, -0.133672]]
       ]
 
       inputs.each do |seed, expected_results|
-        TspKit.srand(seed)
-        got_results = expected_results.map { |_e| TspKit.randn }
+        described_class.srand(seed)
+        got_results = expected_results.map { |_e| described_class.randn }
         got_results.zip(expected_results).each do |got_val, expected_val|
           expect(got_val).to be_within(1e-6).of expected_val
         end
@@ -76,17 +73,17 @@ describe TspKit do
       ]
 
       inputs.each do |seed, expected_results|
-        TspKit.srand(seed)
-        narray = NArray[*0..9]
-        TspKit.shuffle_narray(narray)
+        described_class.srand(seed)
+        narray = Numo::Int32[*0..9]
+        described_class.shuffle_narray(narray)
         expect(narray.to_a).to eql expected_results
       end
     end
 
     it 'can shuffle a large array' do
-      TspKit.srand(1_234_621)
-      narray = NArray.int(200_000).indgen!
-      TspKit.shuffle_narray(narray)
+      described_class.srand(1_234_621)
+      narray = Numo::Int32.zeros(200_000).seq
+      described_class.shuffle_narray(narray)
       expect(narray[500..519].to_a).to eql [37_544, 132_336, 13_460, 78_671, 46_310, 44_317, 126_946,
                                             113_401, 45_819, 56_437, 69_486, 18_315, 20_744, 172_846,
                                             54_965, 82_657, 70_511, 5599, 44_508, 27_858]

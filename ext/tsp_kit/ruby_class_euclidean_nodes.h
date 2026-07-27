@@ -4,7 +4,7 @@
 #define RUBY_CLASS_EUCLIDEAN_NODES_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "struct_euclidean_nodes.h"
 #include "shared_vars.h"
 
@@ -17,5 +17,6 @@ VALUE euclidean_nodes_alloc(VALUE klass);
 EuclideanNodes *get_euclidean_nodes_struct( VALUE obj );
 
 void assert_value_wraps_euclidean_nodes( VALUE obj );
+bool value_wraps_euclidean_nodes( VALUE obj );
 
 #endif

@@ -20,7 +20,6 @@ DistanceRank *distance_rank__create() {
 
 void distance_rank__init( DistanceRank *distance_rank, int num_nodes, int max_rank ) {
   int i;
-  struct NARRAY *narr;
   int32_t *narr_closest_nodes_ptr;
 
   distance_rank->num_nodes = num_nodes;
@@ -28,15 +27,14 @@ void distance_rank__init( DistanceRank *distance_rank, int num_nodes, int max_ra
   distance_rank->max_rank = max_rank;
 
   distance_rank->closest_nodes_shape = ALLOC_N( int, 2 );
-  distance_rank->closest_nodes_shape[0] = max_rank;
-  distance_rank->closest_nodes_shape[1] = num_nodes;
-  distance_rank->narr_closest_nodes = na_make_object( NA_LINT, 2, distance_rank->closest_nodes_shape, cNArray );
-  GetNArray( distance_rank->narr_closest_nodes, narr );
-  narr_closest_nodes_ptr = (int32_t*) narr->ptr;
-  for( i = 0; i < narr->total; i++ ) {
+  distance_rank->closest_nodes_shape[0] = num_nodes;
+  distance_rank->closest_nodes_shape[1] = max_rank;
+  distance_rank->narr_closest_nodes = tsp_numo_new(numo_cInt32, 2, distance_rank->closest_nodes_shape);
+  narr_closest_nodes_ptr = (int32_t *)tsp_numo_write_pointer(distance_rank->narr_closest_nodes);
+  for( i = 0; i < num_nodes * max_rank; i++ ) {
     narr_closest_nodes_ptr[i] = -1;
   }
-  distance_rank->closest_nodes = (int32_t *) narr->ptr;
+  distance_rank->closest_nodes = narr_closest_nodes_ptr;
 
   return;
 }
@@ -48,19 +46,22 @@ void distance_rank__destroy( DistanceRank *distance_rank ) {
 }
 
 void distance_rank__gc_mark( DistanceRank *distance_rank ) {
-  rb_gc_mark( distance_rank->narr_closest_nodes );
+  rb_gc_mark_movable(distance_rank->narr_closest_nodes);
+  return;
+}
+
+void distance_rank__gc_compact(DistanceRank *distance_rank) {
+  distance_rank->narr_closest_nodes = rb_gc_location(distance_rank->narr_closest_nodes);
   return;
 }
 
 void distance_rank__deep_copy( DistanceRank *distance_rank_copy, DistanceRank *distance_rank_orig ) {
-  struct NARRAY *narr;
-
   distance_rank_copy->num_nodes = distance_rank_orig->num_nodes;
   distance_rank_copy->max_rank = distance_rank_orig->max_rank;
 
-  distance_rank_copy->narr_closest_nodes = na_clone( distance_rank_orig->narr_closest_nodes );
-  GetNArray( distance_rank_copy->narr_closest_nodes, narr );
-  distance_rank_copy->closest_nodes = (int32_t *) narr->ptr;
+  distance_rank_copy->narr_closest_nodes = tsp_numo_clone(distance_rank_orig->narr_closest_nodes);
+  distance_rank_copy->closest_nodes =
+    (int32_t *)tsp_numo_read_write_pointer(distance_rank_copy->narr_closest_nodes);
   distance_rank_copy->closest_nodes_shape = ALLOC_N( int, 2 );
   memcpy( distance_rank_copy->closest_nodes_shape, distance_rank_orig->closest_nodes_shape, 2 * sizeof(int) );
 
@@ -146,15 +147,12 @@ DistanceRank * distance_rank__from_cost_matrix( CostMatrix *nodes, int max_rank 
 void distance_rank__resize( DistanceRank *distance_rank, int new_max_rank ) {
   int i, j, nn, copy_size;
   int *new_cn_ptr;
-  struct NARRAY *narr;
   VALUE new_cn;
 
   nn = distance_rank->num_nodes;
-  distance_rank->closest_nodes_shape[0] = new_max_rank;
-  new_cn = na_make_object( NA_LINT, 2, distance_rank->closest_nodes_shape, cNArray );
-
-  GetNArray( new_cn, narr );
-  new_cn_ptr = (int32_t*) narr->ptr;
+  distance_rank->closest_nodes_shape[1] = new_max_rank;
+  new_cn = tsp_numo_new(numo_cInt32, 2, distance_rank->closest_nodes_shape);
+  new_cn_ptr = (int32_t *)tsp_numo_write_pointer(new_cn);
 
   copy_size = new_max_rank;
   if (new_max_rank > distance_rank->max_rank) {

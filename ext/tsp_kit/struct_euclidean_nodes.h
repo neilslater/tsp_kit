@@ -9,7 +9,7 @@
 #define STRUCT_EUCLIDEAN_NODES_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "struct_cost_matrix.h"
 
 typedef struct _euclidean_nodes_raw {
@@ -27,6 +27,7 @@ void euclidean_nodes__init( EuclideanNodes *nodes, int num_nodes, int num_dims )
 void euclidean_nodes__destroy( EuclideanNodes *nodes );
 
 void euclidean_nodes__gc_mark( EuclideanNodes *nodes );
+void euclidean_nodes__gc_compact( EuclideanNodes *nodes );
 
 void euclidean_nodes__deep_copy( EuclideanNodes *nodes_copy, EuclideanNodes *nodes_orig );
 

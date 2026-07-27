@@ -9,9 +9,11 @@
 #define COMBINED_NODES_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "struct_cost_matrix.h"
 #include "struct_euclidean_nodes.h"
+#include "ruby_class_cost_matrix.h"
+#include "ruby_class_euclidean_nodes.h"
 #include "utilities.h"
 
 double null_distance_fn( void *nodes, int node_a_id, int node_b_id );

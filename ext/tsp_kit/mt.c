@@ -55,7 +55,7 @@ static bool generate;
 static bool generate_f;
 
 /* initializes mt[N] with a seed */
-void init_genrand(unsigned long s)
+void tsp_kit_mt_seed(unsigned long s)
 {
     generate = false;
     generate_f = false;
@@ -77,12 +77,12 @@ void init_genrand(unsigned long s)
 /* init_key is the array for initializing keys */
 /* key_length is its length */
 /* slight change for C++, 2004/2/26 */
-void init_by_array(unsigned long init_key[], int key_length)
+void tsp_kit_mt_seed_array(unsigned long init_key[], int key_length)
 {
     int i, j, k;
     generate = false;
     generate_f = false;
-    init_genrand(19650218UL);
+    tsp_kit_mt_seed(19650218UL);
     i=1; j=0;
     k = (N>key_length ? N : key_length);
     for (; k; k--) {
@@ -105,7 +105,7 @@ void init_by_array(unsigned long init_key[], int key_length)
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-unsigned long genrand_int32(void)
+static unsigned long tsp_kit_mt_rand_int32(void)
 {
     unsigned long y;
     static unsigned long mag01[2]={0x0UL, MATRIX_A};
@@ -115,7 +115,7 @@ unsigned long genrand_int32(void)
         int kk;
 
         if (mti == N+1)   /* if init_genrand() has not been called, */
-            init_genrand(5489UL); /* a default initial seed is used */
+            tsp_kit_mt_seed(5489UL); /* a default initial seed is used */
 
         for (kk=0;kk<N-M;kk++) {
             y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
@@ -143,31 +143,31 @@ unsigned long genrand_int32(void)
 }
 
 /* generates a random number on [0,0x7fffffff]-interval */
-long genrand_int31(void)
+long tsp_kit_mt_rand_int31(void)
 {
-    return (long)(genrand_int32()>>1);
+    return (long)(tsp_kit_mt_rand_int32()>>1);
 }
 
 /* generates a random number on [0,1]-real-interval */
-float genrand_real1(void)
+float tsp_kit_mt_rand_float(void)
 {
-  unsigned long y = genrand_int32();
+  unsigned long y = tsp_kit_mt_rand_int32();
   return (float)((int)y) * (1.0/4294967295.0)
     + (0.5 + 0.5/4294967295.0);
 }
 
 /* generates a random number on [0,1) with 53-bit resolution */
-double genrand_res53(void)
+double tsp_kit_mt_rand_double(void)
 {
   // Casting to signed long explicitly can improve speed
-  long a = (long)(genrand_int32()>>5);
-  long b = (long)(genrand_int32()>>6);
+  long a = (long)(tsp_kit_mt_rand_int32()>>5);
+  long b = (long)(tsp_kit_mt_rand_int32()>>6);
   return(a*67108864.0+b)*(1.0/9007199254740992.0);
 }
 
 /* generates a random number from normal distribution with SD 1 */
 // From Wikipedia: https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
-float genrand_norm(void) {
+float tsp_kit_mt_rand_normal(void) {
     static const float two_pi_f = 2.0*3.14159265358979323846;
     static float z1_f;
     float u1, u2, z0_f;
@@ -176,8 +176,8 @@ float genrand_norm(void) {
     if (!generate_f)
        return z1_f;
 
-    u1 = genrand_real1();
-    u2 = genrand_real1();
+    u1 = tsp_kit_mt_rand_float();
+    u2 = tsp_kit_mt_rand_float();
     if ( u1 < 1e-20 ) u1 = 1e-20;
 
     z0_f = sqrtf(-2.0 * logf(u1)) * cosf(two_pi_f * u2);
@@ -187,7 +187,7 @@ float genrand_norm(void) {
 
 /* generates a random number from normal distribution with SD 1 */
 // From Wikipedia: https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
-double genrand_norm_dbl(void) {
+double tsp_kit_mt_rand_normal_double(void) {
     static const double two_pi = 2.0*3.14159265358979323846;
     static double z1;
     double u1, u2, z0;
@@ -196,8 +196,8 @@ double genrand_norm_dbl(void) {
     if (!generate)
        return z1;
 
-    u1 = genrand_res53();
-    u2 = genrand_res53();
+    u1 = tsp_kit_mt_rand_double();
+    u2 = tsp_kit_mt_rand_double();
     if ( u1 < 1e-100 ) u1 = 1e-100;
 
     z0 = sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
@@ -206,21 +206,25 @@ double genrand_norm_dbl(void) {
 }
 
 // For large ints, over ~ 10,000,000 this naive approach starts to get measurably biased.
-int random_int_up_to(int max_int) {
-  return genrand_int32() % max_int;
+int tsp_kit_mt_rand_int_up_to(int max_int) {
+  return tsp_kit_mt_rand_int32() % max_int;
 }
 
-int half_norm_int(float sd) {
-  return (int) roundf(fabs(genrand_norm() * sd));
+int tsp_kit_mt_half_normal_int(float sd) {
+  return (int) roundf(fabs(tsp_kit_mt_rand_normal() * sd));
 }
 
-void init_srand_by_time() {
+void tsp_kit_mt_seed_from_time(void) {
   unsigned long seed[2];
   struct timeval tv;
   gettimeofday(&tv, 0);
   seed[0] = tv.tv_sec;
   seed[1] = tv.tv_usec;
   // Anything else easy to raid for entropy?
-  init_by_array( seed , 2 );
+  tsp_kit_mt_seed_array( seed , 2 );
   return;
+}
+
+int tsp_kit_mt_seeded(void) {
+  return mti != N + 1;
 }

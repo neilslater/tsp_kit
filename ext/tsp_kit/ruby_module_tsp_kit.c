@@ -9,7 +9,7 @@
  * @return [nil]
  */
 static VALUE rbmodule__srand( VALUE self, VALUE rv_seed ) {
-  init_genrand( NUM2ULONG( rv_seed ) );
+  tsp_kit_mt_seed( NUM2ULONG( rv_seed ) );
   return Qnil;
 }
 
@@ -31,7 +31,7 @@ static VALUE rbmodule__srand_array( VALUE self, VALUE rv_seed_array ) {
   for ( i = 0; i < n; i++ ) {
     tsp_kit_srand_seed[i] = NUM2ULONG( rb_ary_entry( rv_seed_array, i ) );
   }
-  init_by_array( tsp_kit_srand_seed, n );
+  tsp_kit_mt_seed_array( tsp_kit_srand_seed, n );
   return Qnil;
 }
 
@@ -41,7 +41,15 @@ static VALUE rbmodule__srand_array( VALUE self, VALUE rv_seed_array ) {
  * @return [Float] random number in range 0.0..1.0
  */
 static VALUE rbmodule__rand_float( VALUE self ) {
-  return FLT2NUM( genrand_real1() );
+  return FLT2NUM( tsp_kit_mt_rand_float() );
+}
+
+/* @!visibility private
+ * Reports whether the extension seeded its own random-number generator.
+ * @return [Boolean]
+ */
+static VALUE rbmodule__rng_seeded( VALUE self ) {
+  return tsp_kit_mt_seeded() ? Qtrue : Qfalse;
 }
 
 /* @overload randn( )
@@ -50,41 +58,49 @@ static VALUE rbmodule__rand_float( VALUE self ) {
  * @return [Float] random number in range 0.0..1.0
  */
 static VALUE rbmodule__randn_float( VALUE self ) {
-  return FLT2NUM( genrand_norm() );
+  return FLT2NUM( tsp_kit_mt_rand_normal() );
 }
 
 /* @overload shuffle_narray( narray )
  * @!visibility private
- * Use the random number generator to shuffle some integers in a NArray
- * @return [NArray] original NArray
+ * Use the random number generator to shuffle a Numo::Int32 array.
+ * @return [Numo::Int32] original array
  */
 static VALUE rbmodule__shuffle_narray( VALUE self, VALUE rv_narray ) {
-  struct NARRAY *narr;
-  GetNArray( rv_narray, narr );
-
-  // TODO: Raise error if NArray is wrong type
-
-  shuffle_ints( narr->total, (int *) narr->ptr );
+  narray_t *narr;
+  narr = tsp_numo_metadata(rv_narray);
+  if (!rb_obj_is_kind_of(rv_narray, numo_cInt32)) {
+    rb_raise(rb_eTypeError, "expected Numo::Int32");
+  }
+  shuffle_ints((int)narr->size, (int *)tsp_numo_read_write_pointer(rv_narray));
   return rv_narray;
 }
 
 /* @overload quicksort_a_by_b( narray_a, narray_b )
  * @!visibility private
  * Test quicksort_by
- * @return [NArray] original NArray
+ * @return [Numo::Int32] original array
  */
 static VALUE rbmodule__quicksort_a_by_b( VALUE self, VALUE rv_narray_a, VALUE rv_narray_b ) {
-  struct NARRAY *narr_a;
-  struct NARRAY *narr_b;
+  narray_t *narr_a;
+  narray_t *narr_b;
 
-  GetNArray( rv_narray_a, narr_a );
-  GetNArray( rv_narray_b, narr_b );
+  narr_a = tsp_numo_metadata(rv_narray_a);
+  narr_b = tsp_numo_metadata(rv_narray_b);
 
-  // TODO: Raise error if either NArray is wrong type or different size, or if a has ids outside of b
-  if ( narr_b->total != narr_a->total ) {
+  if (!rb_obj_is_kind_of(rv_narray_a, numo_cInt32)) {
+    rb_raise(rb_eTypeError, "first array must be Numo::Int32");
+  }
+  if (!rb_obj_is_kind_of(rv_narray_b, numo_cDFloat)) {
+    rb_raise(rb_eTypeError, "second array must be Numo::DFloat");
+  }
+  if ( narr_b->size != narr_a->size ) {
     rb_raise( rb_eArgError, "arrays must be same size" );
   }
-  quicksort_ids_by_double( (int *) narr_a->ptr, (double *) narr_b->ptr, 0, narr_b->total - 1 );
+  quicksort_ids_by_double(
+    (int *)tsp_numo_read_write_pointer(rv_narray_a),
+    (double *)tsp_numo_read_pointer(rv_narray_b), 0, (int)narr_b->size - 1
+  );
 
   return rv_narray_a;
 }
@@ -92,15 +108,18 @@ static VALUE rbmodule__quicksort_a_by_b( VALUE self, VALUE rv_narray_a, VALUE rv
 /* @overload quicksort_ints( narray )
  * @!visibility private
  * Test quicksort
- * @return [NArray] original NArray
+ * @return [Numo::Int32] original array
  */
 static VALUE rbmodule__quicksort_ints( VALUE self, VALUE rv_narray ) {
-  struct NARRAY *narr;
+  narray_t *narr;
 
-  GetNArray( rv_narray, narr );
-
-  // TODO: Raise error if NArray is wrong type
-  quicksort_ints( (int *) narr->ptr, 0, narr->total - 1 );
+  narr = tsp_numo_metadata(rv_narray);
+  if (!rb_obj_is_kind_of(rv_narray, numo_cInt32)) {
+    rb_raise(rb_eTypeError, "expected Numo::Int32");
+  }
+  quicksort_ints(
+    (int *)tsp_numo_read_write_pointer(rv_narray), 0, (int)narr->size - 1
+  );
 
   return rv_narray;
 }
@@ -111,7 +130,7 @@ static VALUE rbmodule__quicksort_ints( VALUE self, VALUE rv_narray ) {
  */
 VALUE rbmodule__halfnorm_int( VALUE self, VALUE rv_stdev ) {
   float s = NUM2FLT(rv_stdev);
-  return INT2NUM(half_norm_int(s));
+  return INT2NUM(tsp_kit_mt_half_normal_int(s));
 }
 
 /* @overload random_int_up_to( max_int )
@@ -120,7 +139,7 @@ VALUE rbmodule__halfnorm_int( VALUE self, VALUE rv_stdev ) {
  */
 VALUE rbmodule__random_int_up_to( VALUE self, VALUE rv_n ) {
   int n = NUM2INT(rv_n);
-  return INT2NUM(random_int_up_to(n));
+  return INT2NUM(tsp_kit_mt_rand_int_up_to(n));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,6 +180,7 @@ void init_module_tsp_kit() {
   rb_define_singleton_method( TspKit, "srand", rbmodule__srand, 1 );
   rb_define_singleton_method( TspKit, "srand_array", rbmodule__srand_array, 1 );
   rb_define_singleton_method( TspKit, "rand", rbmodule__rand_float, 0 );
+  rb_define_singleton_method( TspKit, "rng_seeded?", rbmodule__rng_seeded, 0 );
   rb_define_singleton_method( TspKit, "randn", rbmodule__randn_float, 0 );
   rb_define_singleton_method( TspKit, "halfnorm_int", rbmodule__halfnorm_int, 1 );
   rb_define_singleton_method( TspKit, "random_int_up_to", rbmodule__random_int_up_to, 1 );
@@ -175,5 +195,4 @@ void init_module_tsp_kit() {
   init_greedy_solver_class();
   init_one_tree_class();
   init_priority_queue_class();
-  init_srand_by_time();
 }

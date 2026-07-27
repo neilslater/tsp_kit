@@ -2,8 +2,17 @@
 
 source 'https://rubygems.org'
 
-gem 'narray', '>= 0.6.0.8'
-gem 'rake', '>= 1.9.1'
-gem 'rake-compiler', '>= 0.8.3'
-gem 'rspec', '>= 2.13.0'
-gem 'yard', '>= 0.8.7.2'
+gemspec
+
+group :development, :test do
+  gem 'bundler-audit', '~> 0.9'
+  gem 'irb', '~> 1.15'
+  gem 'rake', '~> 13.2'
+  gem 'rake-compiler', '~> 1.3'
+  gem 'rspec', '~> 3.13'
+  gem 'rubocop', '~> 1.80', require: false
+  gem 'rubocop-rake', '~> 0.7', require: false
+  gem 'rubocop-rspec', '~> 3.8', require: false
+  gem 'simplecov', '~> 0.22', require: false
+  gem 'yard', '~> 0.9'
+end

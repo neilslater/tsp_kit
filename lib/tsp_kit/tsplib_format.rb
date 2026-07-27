@@ -1,18 +1,20 @@
 # frozen_string_literal: true
 
-require 'set'
-
 module TspKit
+  # Parsers and adapters for external file formats.
   module File
   end
 end
 
 module TspKit
   module File
+    # A supported TSPLIB problem definition.
     class TspLib
       attr_reader :name, :comment, :type, :dimension, :edge_weight_type, :node_coords
 
+      # Supported TSPLIB problem types.
       VALID_TYPES = Set['TSP']
+      # Supported TSPLIB edge-weight encodings.
       VALID_EDGE_WEIGHT_TYPES = Set['EUC_2D']
 
       def initialize(tsplib_hash)
@@ -24,15 +26,17 @@ module TspKit
         @node_coords = tsplib_hash['NODE_COORDS']
       end
 
+      # Reads and validates a TSPLIB file.
+      # @param file_path [String] source path
+      # @return [TspLib]
       def self.read_file(file_path)
         new(file_to_tsplib_hash(file_path))
       end
 
+      # Converts the parsed problem to TspKit nodes.
+      # @return [TspKit::Nodes::Euclidean]
       def get_nodes
-        case edge_weight_type
-        when 'EUC_2D'
-          generate_nodes_euc_2d
-        end
+        generate_nodes_euc_2d
       end
 
       private
@@ -41,7 +45,7 @@ module TspKit
         nodes = TspKit::Nodes::Euclidean.new(dimension, 2)
         locations = nodes.locations
         dimension.times do |i|
-          locations[0..1, i] = node_coords[i + 1]
+          locations[i, 0..1] = node_coords[i + 1]
         end
         nodes
       end
@@ -71,16 +75,23 @@ module TspKit
         new_edge_weight_type
       end
 
+      # Stateful line parser used while reading a TSPLIB file.
       class Parser
         attr_reader :section
 
+        # Header names recognized by the parser.
         HEADERS = Set['NAME', 'COMMENT', 'TYPE', 'DIMENSION', 'EDGE_WEIGHT_TYPE']
+        # Section markers recognized by the parser.
         SECTION_STARTS = Set['NODE_COORD_SECTION']
 
         def initialize
           @section = :headers
         end
 
+        # Adds one source line to a parsed attribute hash.
+        # @param text [String] source line
+        # @param hash [Hash] accumulated attributes
+        # @return [void]
         def add_line(text, hash)
           text = text.strip
 
@@ -94,10 +105,9 @@ module TspKit
             return
           end
 
-          case @section
-          when :headers
+          if @section == :headers
             parse_header_line(text, hash)
-          when :node_coord_section
+          else
             parse_node_coord_line(text, hash)
           end
         end
@@ -120,11 +130,12 @@ module TspKit
       def self.file_to_tsplib_hash(file_path)
         parser = Parser.new
         tsplib_hash = {}
-        File.open(file_path, 'r').each_line do |line|
-          parser.add_line(line.chomp, tsplib_hash)
+        ::File.open(file_path, 'r') do |file|
+          file.each_line { |line| parser.add_line(line.chomp, tsplib_hash) }
         end
         tsplib_hash
       end
+      private_class_method :file_to_tsplib_hash
     end
   end
 end

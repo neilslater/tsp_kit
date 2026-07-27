@@ -19,7 +19,6 @@ CostMatrix *cost_matrix__create() {
 
 void cost_matrix__init( CostMatrix *cost_matrix, int num_nodes ) {
   int i;
-  struct NARRAY *narr;
   double *narr_weights_ptr;
 
   cost_matrix->num_nodes = num_nodes;
@@ -27,13 +26,12 @@ void cost_matrix__init( CostMatrix *cost_matrix, int num_nodes ) {
   cost_matrix->weights_shape = ALLOC_N( int, 2 );
   cost_matrix->weights_shape[0] = num_nodes;
   cost_matrix->weights_shape[1] = num_nodes;
-  cost_matrix->narr_weights = na_make_object( NA_DFLOAT, 2, cost_matrix->weights_shape, cNArray );
-  GetNArray( cost_matrix->narr_weights, narr );
-  narr_weights_ptr = (double*) narr->ptr;
-  for( i = 0; i < narr->total; i++ ) {
+  cost_matrix->narr_weights = tsp_numo_new(numo_cDFloat, 2, cost_matrix->weights_shape);
+  narr_weights_ptr = (double *)tsp_numo_write_pointer(cost_matrix->narr_weights);
+  for( i = 0; i < num_nodes * num_nodes; i++ ) {
     narr_weights_ptr[i] = 0.0;
   }
-  cost_matrix->weights = (double *) narr->ptr;
+  cost_matrix->weights = narr_weights_ptr;
 
   return;
 }
@@ -45,18 +43,20 @@ void cost_matrix__destroy( CostMatrix *cost_matrix ) {
 }
 
 void cost_matrix__gc_mark( CostMatrix *cost_matrix ) {
-  rb_gc_mark( cost_matrix->narr_weights );
+  rb_gc_mark_movable(cost_matrix->narr_weights);
+  return;
+}
+
+void cost_matrix__gc_compact(CostMatrix *cost_matrix) {
+  cost_matrix->narr_weights = rb_gc_location(cost_matrix->narr_weights);
   return;
 }
 
 void cost_matrix__deep_copy( CostMatrix *cost_matrix_copy, CostMatrix *cost_matrix_orig ) {
-  struct NARRAY *narr;
-
   cost_matrix_copy->num_nodes = cost_matrix_orig->num_nodes;
 
-  cost_matrix_copy->narr_weights = na_clone( cost_matrix_orig->narr_weights );
-  GetNArray( cost_matrix_copy->narr_weights, narr );
-  cost_matrix_copy->weights = (double *) narr->ptr;
+  cost_matrix_copy->narr_weights = tsp_numo_clone(cost_matrix_orig->narr_weights);
+  cost_matrix_copy->weights = (double *)tsp_numo_read_write_pointer(cost_matrix_copy->narr_weights);
   cost_matrix_copy->weights_shape = ALLOC_N( int, 2 );
   memcpy( cost_matrix_copy->weights_shape, cost_matrix_orig->weights_shape, 2 * sizeof(int) );
 

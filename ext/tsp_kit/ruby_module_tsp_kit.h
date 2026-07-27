@@ -9,7 +9,7 @@
 #define RUBY_MODULE_FACTORY_ELF_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "core_narray.h"
 #include "shared_vars.h"
 #include "shared_helpers.h"

@@ -12,11 +12,11 @@ void null_distance_array_fn( void *nodes, int node_id, double * distances ) {
 }
 
 NodeType get_node_type_from_rv( VALUE rv_nodes ) {
-  if ( TYPE(rv_nodes) == T_DATA && RDATA(rv_nodes)->dfree == (RUBY_DATA_FUNC)euclidean_nodes__destroy) {
+  if (value_wraps_euclidean_nodes(rv_nodes)) {
     return NODE_EUC;
   }
 
-  if ( TYPE(rv_nodes) == T_DATA && RDATA(rv_nodes)->dfree == (RUBY_DATA_FUNC)cost_matrix__destroy) {
+  if (value_wraps_cost_matrix(rv_nodes)) {
     return NODE_CM;
   }
 

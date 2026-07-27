@@ -20,22 +20,20 @@ EuclideanNodes *euclidean_nodes__create() {
 
 void euclidean_nodes__init( EuclideanNodes *nodes, int num_nodes, int num_dims ) {
   int i;
-  struct NARRAY *narr;
   double *narr_locations_ptr;
 
   nodes->num_nodes = num_nodes;
   nodes->num_dims = num_dims;
 
   nodes->locations_shape = ALLOC_N( int, 2 );
-  nodes->locations_shape[0] = num_dims;
-  nodes->locations_shape[1] = num_nodes;
-  nodes->narr_locations = na_make_object( NA_DFLOAT, 2, nodes->locations_shape, cNArray );
-  GetNArray( nodes->narr_locations, narr );
-  narr_locations_ptr = (double*) narr->ptr;
-  for( i = 0; i < narr->total; i++ ) {
+  nodes->locations_shape[0] = num_nodes;
+  nodes->locations_shape[1] = num_dims;
+  nodes->narr_locations = tsp_numo_new(numo_cDFloat, 2, nodes->locations_shape);
+  narr_locations_ptr = (double *)tsp_numo_write_pointer(nodes->narr_locations);
+  for( i = 0; i < num_nodes * num_dims; i++ ) {
     narr_locations_ptr[i] = 0.0;
   }
-  nodes->locations = (double *) narr->ptr;
+  nodes->locations = narr_locations_ptr;
 
   return;
 }
@@ -47,19 +45,21 @@ void euclidean_nodes__destroy( EuclideanNodes *nodes ) {
 }
 
 void euclidean_nodes__gc_mark( EuclideanNodes *nodes ) {
-  rb_gc_mark( nodes->narr_locations );
+  rb_gc_mark_movable(nodes->narr_locations);
+  return;
+}
+
+void euclidean_nodes__gc_compact(EuclideanNodes *nodes) {
+  nodes->narr_locations = rb_gc_location(nodes->narr_locations);
   return;
 }
 
 void euclidean_nodes__deep_copy( EuclideanNodes *nodes_copy, EuclideanNodes *nodes_orig ) {
-  struct NARRAY *narr;
-
   nodes_copy->num_nodes = nodes_orig->num_nodes;
   nodes_copy->num_dims = nodes_orig->num_dims;
 
-  nodes_copy->narr_locations = na_clone( nodes_orig->narr_locations );
-  GetNArray( nodes_copy->narr_locations, narr );
-  nodes_copy->locations = (double *) narr->ptr;
+  nodes_copy->narr_locations = tsp_numo_clone(nodes_orig->narr_locations);
+  nodes_copy->locations = (double *)tsp_numo_read_write_pointer(nodes_copy->narr_locations);
   nodes_copy->locations_shape = ALLOC_N( int, 2 );
   memcpy( nodes_copy->locations_shape, nodes_orig->locations_shape, 2 * sizeof(int) );
 

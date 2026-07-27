@@ -10,7 +10,7 @@
 
 #include <ruby.h>
 #include <float.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "utilities.h"
 
 typedef struct _priority_queue_raw {

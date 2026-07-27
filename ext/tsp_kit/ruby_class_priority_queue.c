@@ -8,8 +8,15 @@
 //  struct_priority_queue.c
 //
 
+static const rb_data_type_t priority_queue_data_type = {
+  "TspKit::PriorityQueue",
+  { (RUBY_DATA_FUNC)priority_queue__gc_mark, (RUBY_DATA_FUNC)priority_queue__destroy, NULL, NULL,
+    { NULL } },
+  NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 VALUE priority_queue_as_ruby_class( PriorityQueue *priority_queue , VALUE klass ) {
-  return Data_Wrap_Struct( klass, priority_queue__gc_mark, priority_queue__destroy, priority_queue );
+  return TypedData_Wrap_Struct( klass, &priority_queue_data_type, priority_queue );
 }
 
 VALUE priority_queue_alloc(VALUE klass) {
@@ -18,13 +25,12 @@ VALUE priority_queue_alloc(VALUE klass) {
 
 PriorityQueue *get_priority_queue_struct( VALUE obj ) {
   PriorityQueue *priority_queue;
-  Data_Get_Struct( obj, PriorityQueue, priority_queue );
+  TypedData_Get_Struct( obj, PriorityQueue, &priority_queue_data_type, priority_queue );
   return priority_queue;
 }
 
 void assert_value_wraps_priority_queue( VALUE obj ) {
-  if ( TYPE(obj) != T_DATA ||
-      RDATA(obj)->dfree != (RUBY_DATA_FUNC)priority_queue__destroy) {
+  if (!rb_typeddata_is_kind_of(obj, &priority_queue_data_type)) {
     rb_raise( rb_eTypeError, "Expected a PriorityQueue object, but got something else" );
   }
 }

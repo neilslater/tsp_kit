@@ -9,8 +9,15 @@
 //  struct_cost_matrix.c
 //
 
+static const rb_data_type_t cost_matrix_data_type = {
+  "TspKit::Nodes::CostMatrix",
+  { (RUBY_DATA_FUNC)cost_matrix__gc_mark, (RUBY_DATA_FUNC)cost_matrix__destroy, NULL,
+    (RUBY_DATA_FUNC)cost_matrix__gc_compact, { NULL } },
+  NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 VALUE cost_matrix_as_ruby_class( CostMatrix *cost_matrix , VALUE klass ) {
-  return Data_Wrap_Struct( klass, cost_matrix__gc_mark, cost_matrix__destroy, cost_matrix );
+  return TypedData_Wrap_Struct( klass, &cost_matrix_data_type, cost_matrix );
 }
 
 VALUE cost_matrix_alloc(VALUE klass) {
@@ -19,15 +26,18 @@ VALUE cost_matrix_alloc(VALUE klass) {
 
 CostMatrix *get_cost_matrix_struct( VALUE obj ) {
   CostMatrix *cost_matrix;
-  Data_Get_Struct( obj, CostMatrix, cost_matrix );
+  TypedData_Get_Struct( obj, CostMatrix, &cost_matrix_data_type, cost_matrix );
   return cost_matrix;
 }
 
 void assert_value_wraps_cost_matrix( VALUE obj ) {
-  if ( TYPE(obj) != T_DATA ||
-      RDATA(obj)->dfree != (RUBY_DATA_FUNC)cost_matrix__destroy) {
+  if (!value_wraps_cost_matrix(obj)) {
     rb_raise( rb_eTypeError, "Expected a CostMatrix object, but got something else" );
   }
+}
+
+bool value_wraps_cost_matrix(VALUE obj) {
+  return rb_typeddata_is_kind_of(obj, &cost_matrix_data_type);
 }
 
 /* Document-class: TspKit::CostMatrix
@@ -86,7 +96,7 @@ VALUE cost_matrix_rbobject__get_num_nodes( VALUE self ) {
 
 /* @!attribute [r] weights
  * Description goes here
- * @return [NArray<float>]
+ * @return [Numo::DFloat]
  */
 VALUE cost_matrix_rbobject__get_narr_weights( VALUE self ) {
   CostMatrix *cost_matrix = get_cost_matrix_struct( self );
@@ -94,24 +104,24 @@ VALUE cost_matrix_rbobject__get_narr_weights( VALUE self ) {
 }
 
 /* @overload from_data( weights )
- * Creates new TspKit::Nodes::CostMatrix object directly from NArray of locations
+ * Creates a TspKit::Nodes::CostMatrix from a two-dimensional Numo array.
  *
  * @return [TspKit::Nodes::CostMatrix] new instance
  */
 VALUE cost_matrix_rbclass__from_data( VALUE self, VALUE rv_weights) {
-  struct NARRAY *narr;
+  narray_t *narr;
   int num_nodes;
   VALUE rv_nodes;
   CostMatrix *nodes;
 
-  rv_weights = na_cast_object(rv_weights, NA_DFLOAT);
-  GetNArray( rv_weights, narr );
-  if (narr->rank != 2) {
-    rb_raise(rb_eArgError, "weights array should have rank 2, but is rank %d", narr->rank);
+  rv_weights = tsp_numo_cast(numo_cDFloat, rv_weights);
+  narr = tsp_numo_metadata(rv_weights);
+  if (narr->ndim != 2) {
+    rb_raise(rb_eArgError, "weights array should have rank 2, but is rank %d", narr->ndim);
   }
 
-  num_nodes = narr->shape[0];
-  if ( num_nodes != narr->shape[1] ) {
+  num_nodes = (int)narr->shape[0];
+  if ((size_t)num_nodes != narr->shape[1]) {
     rb_raise(rb_eArgError, "weights array is not square" );
   }
 
@@ -123,7 +133,7 @@ VALUE cost_matrix_rbclass__from_data( VALUE self, VALUE rv_weights) {
   nodes = get_cost_matrix_struct( rv_nodes );
   nodes->num_nodes = num_nodes;
   nodes->narr_weights = rv_weights;
-  nodes->weights = (double *) narr->ptr;
+  nodes->weights = (double *)tsp_numo_read_write_pointer(rv_weights);
   nodes->weights_shape = ALLOC_N( int, 2 );
   nodes->weights_shape[0] = num_nodes;
   nodes->weights_shape[1] = num_nodes;
@@ -176,12 +186,11 @@ VALUE cost_matrix_rbobject__distance_between( VALUE self, VALUE rv_node_a_id, VA
 /* @overload all_distances_from( node_id )
  * Returns distance metric from one node to all other nodes.
  * @param [Integer] node_id node to measure from
- * @return [NArray] all distances from given node, indexed by destination node_id
+ * @return [Numo::DFloat] all distances from given node
  */
 VALUE cost_matrix_rbobject__all_distances_from( VALUE self, VALUE rv_node_id ) {
   int node_id;
   VALUE rv_result;
-  struct NARRAY *narr;
   int shape[1] = { 0 };
   CostMatrix *cost_matrix = get_cost_matrix_struct( self );
 
@@ -191,9 +200,10 @@ VALUE cost_matrix_rbobject__all_distances_from( VALUE self, VALUE rv_node_id ) {
   }
 
   shape[0] = cost_matrix->num_nodes;
-  rv_result = na_make_object( NA_DFLOAT, 1, shape, cNArray );
-  GetNArray( rv_result, narr );
-  cost_matrix__all_distances_from( cost_matrix, node_id, (double*) narr->ptr );
+  rv_result = tsp_numo_new(numo_cDFloat, 1, shape);
+  cost_matrix__all_distances_from(
+    cost_matrix, node_id, (double *)tsp_numo_write_pointer(rv_result)
+  );
   return rv_result;
 }
 

@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: '0 6 4 * *'
+
+permissions:
+  contents: read
+
+jobs:
+  specs:
+    name: Ruby ${{ matrix.ruby }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - "3.3"
+          - "3.4"
+          - "4.0"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - run: bundle exec rake
+
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+          bundler-cache: true
+      - run: bundle exec rake coverage
+      - run: bundle exec rubocop
+      - run: bundle exec bundle-audit check --update
+      - run: bundle exec rake yard
+      - run: gem build tsp_kit.gemspec
+
+  native-quality:
+    name: C ${{ matrix.check }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        check:
+          - lint
+          - coverage
+          - sanitize
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install native quality tools
+        run: sudo apt-get update && sudo apt-get install -y gcovr
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+      - name: Show native compiler
+        run: ruby -rrbconfig -e 'puts RbConfig::CONFIG.fetch("CC")'
+      - name: Run native quality check
+        run: bundle exec rake c:${{ matrix.check }}
+      - name: Add C coverage summary to job summary
+        if: matrix.check == 'coverage' && always()
+        run: |
+          if test -f coverage/c/summary.txt; then
+            cat coverage/c/summary.txt >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload C coverage report
+        if: matrix.check == 'coverage' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c-coverage
+          path: coverage/c
+          retention-days: 14
+          if-no-files-found: warn

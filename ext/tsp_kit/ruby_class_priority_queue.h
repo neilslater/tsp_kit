@@ -4,7 +4,7 @@
 #define RUBY_CLASS_PRIORITY_QUEUE_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "struct_priority_queue.h"
 #include "shared_vars.h"
 

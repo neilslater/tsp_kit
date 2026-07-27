@@ -9,7 +9,7 @@
 #define STRUCT_SOLUTION_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 
 typedef struct _solution_raw {
   int num_nodes;
@@ -28,6 +28,7 @@ void solution__init( Solution *solution, int num_nodes );
 void solution__destroy( Solution *solution );
 
 void solution__gc_mark( Solution *solution );
+void solution__gc_compact( Solution *solution );
 
 void solution__deep_copy( Solution *solution_copy, Solution *solution_orig );
 

@@ -37,7 +37,6 @@ OneTree *one_tree__create() {
 
 void one_tree__init( OneTree *tree, int num_nodes ) {
   int i;
-  struct NARRAY *narr;
   double *narr_node_penalties_ptr;
   int32_t *narr_node_ids_ptr;
   int32_t *narr_parents_ptr;
@@ -67,33 +66,30 @@ void one_tree__init( OneTree *tree, int num_nodes ) {
 
   tree->node_penalties_shape = ALLOC_N( int, 1 );
   tree->node_penalties_shape[0] = num_nodes;
-  tree->narr_node_penalties = na_make_object( NA_DFLOAT, 1, tree->node_penalties_shape, cNArray );
-  GetNArray( tree->narr_node_penalties, narr );
-  narr_node_penalties_ptr = (double*) narr->ptr;
-  for( i = 0; i < narr->total; i++ ) {
+  tree->narr_node_penalties = tsp_numo_new(numo_cDFloat, 1, tree->node_penalties_shape);
+  narr_node_penalties_ptr = (double *)tsp_numo_write_pointer(tree->narr_node_penalties);
+  for( i = 0; i < num_nodes; i++ ) {
     narr_node_penalties_ptr[i] = 0.0;
   }
-  tree->node_penalties = (double *) narr->ptr;
+  tree->node_penalties = narr_node_penalties_ptr;
 
   tree->node_ids_shape = ALLOC_N( int, 1 );
   tree->node_ids_shape[0] = num_nodes + 2;
-  tree->narr_node_ids = na_make_object( NA_LINT, 1, tree->node_ids_shape, cNArray );
-  GetNArray( tree->narr_node_ids, narr );
-  narr_node_ids_ptr = (int32_t*) narr->ptr;
-  for( i = 0; i < narr->total; i++ ) {
+  tree->narr_node_ids = tsp_numo_new(numo_cInt32, 1, tree->node_ids_shape);
+  narr_node_ids_ptr = (int32_t *)tsp_numo_write_pointer(tree->narr_node_ids);
+  for( i = 0; i < num_nodes + 2; i++ ) {
     narr_node_ids_ptr[i] = -1;
   }
-  tree->node_ids = (int32_t *) narr->ptr;
+  tree->node_ids = narr_node_ids_ptr;
 
   tree->parents_shape = ALLOC_N( int, 1 );
   tree->parents_shape[0] = num_nodes + 2;
-  tree->narr_parents = na_make_object( NA_LINT, 1, tree->parents_shape, cNArray );
-  GetNArray( tree->narr_parents, narr );
-  narr_parents_ptr = (int32_t*) narr->ptr;
-  for( i = 0; i < narr->total; i++ ) {
+  tree->narr_parents = tsp_numo_new(numo_cInt32, 1, tree->parents_shape);
+  narr_parents_ptr = (int32_t *)tsp_numo_write_pointer(tree->narr_parents);
+  for( i = 0; i < num_nodes + 2; i++ ) {
     narr_parents_ptr[i] = -1;
   }
-  tree->parents = (int32_t *) narr->ptr;
+  tree->parents = narr_parents_ptr;
 
   return;
 }
@@ -113,34 +109,38 @@ void one_tree__destroy( OneTree *tree ) {
 }
 
 void one_tree__gc_mark( OneTree *tree ) {
-  rb_gc_mark( tree->narr_node_penalties );
-  rb_gc_mark( tree->narr_node_ids );
-  rb_gc_mark( tree->narr_parents );
+  rb_gc_mark_movable(tree->narr_node_penalties);
+  rb_gc_mark_movable(tree->narr_node_ids);
+  rb_gc_mark_movable(tree->narr_parents);
+  return;
+}
+
+void one_tree__gc_compact(OneTree *tree) {
+  tree->narr_node_penalties = rb_gc_location(tree->narr_node_penalties);
+  tree->narr_node_ids = rb_gc_location(tree->narr_node_ids);
+  tree->narr_parents = rb_gc_location(tree->narr_parents);
   return;
 }
 
 void one_tree__deep_copy( OneTree *tree_copy, OneTree *tree_orig ) {
-  struct NARRAY *narr;
   int num_nodes = tree_orig->num_nodes;
 
   tree_copy->num_nodes = num_nodes;
   tree_copy->dr_max_rank = tree_orig->dr_max_rank;
 
-  tree_copy->narr_node_penalties = na_clone( tree_orig->narr_node_penalties );
-  GetNArray( tree_copy->narr_node_penalties, narr );
-  tree_copy->node_penalties = (double *) narr->ptr;
+  tree_copy->narr_node_penalties = tsp_numo_clone(tree_orig->narr_node_penalties);
+  tree_copy->node_penalties =
+    (double *)tsp_numo_read_write_pointer(tree_copy->narr_node_penalties);
   tree_copy->node_penalties_shape = ALLOC_N( int, 1 );
   memcpy( tree_copy->node_penalties_shape, tree_orig->node_penalties_shape, 1 * sizeof(int) );
 
-  tree_copy->narr_node_ids = na_clone( tree_orig->narr_node_ids );
-  GetNArray( tree_copy->narr_node_ids, narr );
-  tree_copy->node_ids = (int32_t *) narr->ptr;
+  tree_copy->narr_node_ids = tsp_numo_clone(tree_orig->narr_node_ids);
+  tree_copy->node_ids = (int32_t *)tsp_numo_read_write_pointer(tree_copy->narr_node_ids);
   tree_copy->node_ids_shape = ALLOC_N( int, 1 );
   memcpy( tree_copy->node_ids_shape, tree_orig->node_ids_shape, 1 * sizeof(int) );
 
-  tree_copy->narr_parents = na_clone( tree_orig->narr_parents );
-  GetNArray( tree_copy->narr_parents, narr );
-  tree_copy->parents = (int32_t *) narr->ptr;
+  tree_copy->narr_parents = tsp_numo_clone(tree_orig->narr_parents);
+  tree_copy->parents = (int32_t *)tsp_numo_read_write_pointer(tree_copy->narr_parents);
   tree_copy->parents_shape = ALLOC_N( int, 1 );
   memcpy( tree_copy->parents_shape, tree_orig->parents_shape, 1 * sizeof(int) );
 
@@ -520,9 +520,9 @@ void one_tree__generate_alpha_ranking( OneTree *tree, NodeType ntype, void *node
     alpha_buffer[from_node_id] = -DBL_MAX;
 
     if ( tree->parents[0] == i || tree->parents[1] == i ) {
-      alpha_buffer[tree_idx_one_node_id] = 0.00001 * one_tree__alpha_distance( tree, from_node_id, to_node_id, use_penalties );
+      alpha_buffer[tree_idx_one_node_id] = 0.00001 * one_tree__alpha_distance( tree, from_node_id, tree_idx_one_node_id, use_penalties );
     } else {
-      c = one_tree__alpha_distance( tree, from_node_id, to_node_id, use_penalties );
+      c = one_tree__alpha_distance( tree, from_node_id, tree_idx_one_node_id, use_penalties );
       alpha_buffer[tree_idx_one_node_id] = 1.00001 * c - tree_idx_one_longest_c;
     }
 

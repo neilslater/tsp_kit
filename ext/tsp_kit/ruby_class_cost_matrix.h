@@ -4,7 +4,7 @@
 #define RUBY_CLASS_WEIGHT_MATRIX_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "struct_cost_matrix.h"
 #include "shared_vars.h"
 
@@ -17,5 +17,6 @@ VALUE cost_matrix_alloc( VALUE klass );
 CostMatrix *get_cost_matrix_struct( VALUE obj );
 
 void assert_value_wraps_cost_matrix( VALUE obj );
+bool value_wraps_cost_matrix( VALUE obj );
 
 #endif

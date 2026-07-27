@@ -9,7 +9,7 @@
 #define STRUCT_WEIGHT_MATRIX_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include <stdbool.h>
 
 typedef struct _cost_matrix_raw {
@@ -28,6 +28,7 @@ void cost_matrix__init( CostMatrix *cost_matrix, int num_nodes );
 void cost_matrix__destroy( CostMatrix *cost_matrix );
 
 void cost_matrix__gc_mark( CostMatrix *cost_matrix );
+void cost_matrix__gc_compact( CostMatrix *cost_matrix );
 
 void cost_matrix__deep_copy( CostMatrix *cost_matrix_copy, CostMatrix *cost_matrix_orig );
 

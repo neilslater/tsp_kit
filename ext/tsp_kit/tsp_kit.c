@@ -23,7 +23,7 @@
  *
 */
 
-void Init_tsp_kit() {
+void Init_tsp_kit(void) {
   init_module_tsp_kit();
-  init_srand_by_time();
+  tsp_kit_mt_seed_from_time();
 }

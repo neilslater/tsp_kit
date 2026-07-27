@@ -8,8 +8,15 @@
 //  struct_solution.c
 //
 
+static const rb_data_type_t solution_data_type = {
+  "TspKit::Solution",
+  { (RUBY_DATA_FUNC)solution__gc_mark, (RUBY_DATA_FUNC)solution__destroy, NULL,
+    (RUBY_DATA_FUNC)solution__gc_compact, { NULL } },
+  NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 VALUE solution_as_ruby_class( Solution *solution , VALUE klass ) {
-  return Data_Wrap_Struct( klass, solution__gc_mark, solution__destroy, solution );
+  return TypedData_Wrap_Struct( klass, &solution_data_type, solution );
 }
 
 VALUE solution_alloc(VALUE klass) {
@@ -18,13 +25,12 @@ VALUE solution_alloc(VALUE klass) {
 
 Solution *get_solution_struct( VALUE obj ) {
   Solution *solution;
-  Data_Get_Struct( obj, Solution, solution );
+  TypedData_Get_Struct( obj, Solution, &solution_data_type, solution );
   return solution;
 }
 
 void assert_value_wraps_solution( VALUE obj ) {
-  if ( TYPE(obj) != T_DATA ||
-      RDATA(obj)->dfree != (RUBY_DATA_FUNC)solution__destroy) {
+  if (!rb_typeddata_is_kind_of(obj, &solution_data_type)) {
     rb_raise( rb_eTypeError, "Expected a TspKit::Solution object, but got something else" );
   }
 }
@@ -79,7 +85,7 @@ VALUE solution_rbobject__get_num_nodes( VALUE self ) {
 
 /* @!attribute [r] ids
  * Description goes here
- * @return [NArray<int>]
+ * @return [Numo::Int32]
  */
 VALUE solution_rbobject__get_narr_ids( VALUE self ) {
   Solution *solution = get_solution_struct( self );
@@ -88,7 +94,7 @@ VALUE solution_rbobject__get_narr_ids( VALUE self ) {
 
 /* @!attribute [r] node_idx
  * Description goes here
- * @return [NArray<int>]
+ * @return [Numo::Int32]
  */
 VALUE solution_rbobject__get_narr_node_idx( VALUE self ) {
   Solution *solution = get_solution_struct( self );

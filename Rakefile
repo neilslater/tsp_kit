@@ -23,6 +23,7 @@ RSpec::Core::RakeTask.new(:coverage) do |t|
   t.pattern = 'spec/*_spec.rb'
   t.rspec_opts = ['--require', File.expand_path('spec/coverage_helper.rb', __dir__)]
 end
+Rake::Task[:coverage].enhance([:compile])
 
 YARD::Rake::YardocTask.new(:yard) do |t|
   t.files = ['lib/**/*.rb']

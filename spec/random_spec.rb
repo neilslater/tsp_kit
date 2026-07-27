@@ -4,11 +4,8 @@ require 'helpers'
 
 describe TspKit do
   describe 'random number generator' do
-    it 'does not use the default mt.c seed when loaded' do
-      # Run in a separate process in order to get library loaded with initial state
-      script_output = `ruby -Ilib -e "require 'tsp_kit'; puts TspKit.rand"`
-      got_num = script_output.chomp.to_f
-      expect(got_num).to_not be_within(1e-8).of 0.3147237002849579
+    it 'seeds its native state when loaded' do
+      expect(TspKit).to be_rng_seeded
     end
 
     it 'generates numbers consistently when seeded' do

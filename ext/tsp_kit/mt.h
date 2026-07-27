@@ -54,15 +54,16 @@
 #include <ruby.h>
 #include <sys/time.h>
 
-void init_genrand(unsigned long s);
-void init_by_array(unsigned long init_key[], int key_length);
-double genrand_res53(void);
-float genrand_real1(void);
-long genrand_int31(void);
-void init_srand_by_time();
-float genrand_norm(void);
-double genrand_norm_dbl(void);
-int random_int_up_to(int max_int);
-int half_norm_int(float sd);
+void tsp_kit_mt_seed(unsigned long seed);
+void tsp_kit_mt_seed_array(unsigned long seeds[], int length);
+double tsp_kit_mt_rand_double(void);
+float tsp_kit_mt_rand_float(void);
+long tsp_kit_mt_rand_int31(void);
+void tsp_kit_mt_seed_from_time(void);
+int tsp_kit_mt_seeded(void);
+float tsp_kit_mt_rand_normal(void);
+double tsp_kit_mt_rand_normal_double(void);
+int tsp_kit_mt_rand_int_up_to(int maximum);
+int tsp_kit_mt_half_normal_int(float standard_deviation);
 
 #endif

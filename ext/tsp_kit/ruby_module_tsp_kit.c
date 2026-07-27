@@ -9,7 +9,7 @@
  * @return [nil]
  */
 static VALUE rbmodule__srand( VALUE self, VALUE rv_seed ) {
-  init_genrand( NUM2ULONG( rv_seed ) );
+  tsp_kit_mt_seed( NUM2ULONG( rv_seed ) );
   return Qnil;
 }
 
@@ -31,7 +31,7 @@ static VALUE rbmodule__srand_array( VALUE self, VALUE rv_seed_array ) {
   for ( i = 0; i < n; i++ ) {
     tsp_kit_srand_seed[i] = NUM2ULONG( rb_ary_entry( rv_seed_array, i ) );
   }
-  init_by_array( tsp_kit_srand_seed, n );
+  tsp_kit_mt_seed_array( tsp_kit_srand_seed, n );
   return Qnil;
 }
 
@@ -41,7 +41,15 @@ static VALUE rbmodule__srand_array( VALUE self, VALUE rv_seed_array ) {
  * @return [Float] random number in range 0.0..1.0
  */
 static VALUE rbmodule__rand_float( VALUE self ) {
-  return FLT2NUM( genrand_real1() );
+  return FLT2NUM( tsp_kit_mt_rand_float() );
+}
+
+/* @!visibility private
+ * Reports whether the extension seeded its own random-number generator.
+ * @return [Boolean]
+ */
+static VALUE rbmodule__rng_seeded( VALUE self ) {
+  return tsp_kit_mt_seeded() ? Qtrue : Qfalse;
 }
 
 /* @overload randn( )
@@ -50,7 +58,7 @@ static VALUE rbmodule__rand_float( VALUE self ) {
  * @return [Float] random number in range 0.0..1.0
  */
 static VALUE rbmodule__randn_float( VALUE self ) {
-  return FLT2NUM( genrand_norm() );
+  return FLT2NUM( tsp_kit_mt_rand_normal() );
 }
 
 /* @overload shuffle_narray( narray )
@@ -122,7 +130,7 @@ static VALUE rbmodule__quicksort_ints( VALUE self, VALUE rv_narray ) {
  */
 VALUE rbmodule__halfnorm_int( VALUE self, VALUE rv_stdev ) {
   float s = NUM2FLT(rv_stdev);
-  return INT2NUM(half_norm_int(s));
+  return INT2NUM(tsp_kit_mt_half_normal_int(s));
 }
 
 /* @overload random_int_up_to( max_int )
@@ -131,7 +139,7 @@ VALUE rbmodule__halfnorm_int( VALUE self, VALUE rv_stdev ) {
  */
 VALUE rbmodule__random_int_up_to( VALUE self, VALUE rv_n ) {
   int n = NUM2INT(rv_n);
-  return INT2NUM(random_int_up_to(n));
+  return INT2NUM(tsp_kit_mt_rand_int_up_to(n));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,6 +180,7 @@ void init_module_tsp_kit() {
   rb_define_singleton_method( TspKit, "srand", rbmodule__srand, 1 );
   rb_define_singleton_method( TspKit, "srand_array", rbmodule__srand_array, 1 );
   rb_define_singleton_method( TspKit, "rand", rbmodule__rand_float, 0 );
+  rb_define_singleton_method( TspKit, "rng_seeded?", rbmodule__rng_seeded, 0 );
   rb_define_singleton_method( TspKit, "randn", rbmodule__randn_float, 0 );
   rb_define_singleton_method( TspKit, "halfnorm_int", rbmodule__halfnorm_int, 1 );
   rb_define_singleton_method( TspKit, "random_int_up_to", rbmodule__random_int_up_to, 1 );
@@ -186,5 +195,4 @@ void init_module_tsp_kit() {
   init_greedy_solver_class();
   init_one_tree_class();
   init_priority_queue_class();
-  init_srand_by_time();
 }

@@ -4,20 +4,20 @@ require 'helpers'
 
 describe TspKit::Utils::PriorityQueue do
   describe 'push and pop' do
-    subject { TspKit::Utils::PriorityQueue.new(10) }
+    subject { described_class.new(10) }
 
     it 'returns -1 for pop by default' do
-      expect(subject.pop).to eql(-1)
+      expect(subject.pop).to be(-1)
     end
 
     it 'can push an id and priority, then get the id back' do
       subject.push(7, 1.3, 0)
 
-      expect(subject.peek_payload).to eql(0)
-      expect(subject.pop).to eql(7)
+      expect(subject.peek_payload).to be(0)
+      expect(subject.pop).to be(7)
 
-      expect(subject.peek_payload).to eql(-1)
-      expect(subject.pop).to eql(-1)
+      expect(subject.peek_payload).to be(-1)
+      expect(subject.pop).to be(-1)
     end
 
     it 'can push three ids and priorities, then get them back in priority order' do
@@ -25,21 +25,21 @@ describe TspKit::Utils::PriorityQueue do
       subject.push(6, 1.8, 3)
       subject.push(5, 0.7, 2)
 
-      expect(subject.peek_payload).to eql(2)
-      expect(subject.pop).to eql(5)
+      expect(subject.peek_payload).to be(2)
+      expect(subject.pop).to be(5)
 
-      expect(subject.peek_payload).to eql(4)
-      expect(subject.pop).to eql(7)
+      expect(subject.peek_payload).to be(4)
+      expect(subject.pop).to be(7)
 
-      expect(subject.peek_payload).to eql(3)
-      expect(subject.pop).to eql(6)
+      expect(subject.peek_payload).to be(3)
+      expect(subject.pop).to be(6)
 
-      expect(subject.peek_payload).to eql(-1)
-      expect(subject.pop).to eql(-1)
+      expect(subject.peek_payload).to be(-1)
+      expect(subject.pop).to be(-1)
     end
 
-    context 'longer tests' do
-      subject { TspKit::Utils::PriorityQueue.new(100) }
+    context 'when exercising a longer sequence' do
+      subject { described_class.new(100) }
 
       it 'can push twenty ids and priorities, then get them back in priority order' do
         inputs = [
@@ -141,17 +141,17 @@ describe TspKit::Utils::PriorityQueue do
       subject.push(5, 0.7, 2)
       subject.push(6, 0.3, 8)
 
-      expect(subject.peek_payload).to eql(8)
-      expect(subject.pop).to eql(6)
+      expect(subject.peek_payload).to be(8)
+      expect(subject.pop).to be(6)
 
-      expect(subject.peek_payload).to eql(2)
-      expect(subject.pop).to eql(5)
+      expect(subject.peek_payload).to be(2)
+      expect(subject.pop).to be(5)
 
-      expect(subject.peek_payload).to eql(4)
-      expect(subject.pop).to eql(7)
+      expect(subject.peek_payload).to be(4)
+      expect(subject.pop).to be(7)
 
-      expect(subject.peek_payload).to eql(-1)
-      expect(subject.pop).to eql(-1)
+      expect(subject.peek_payload).to be(-1)
+      expect(subject.pop).to be(-1)
     end
 
     it "doesn't re-prioritise to lower priority" do
@@ -160,17 +160,17 @@ describe TspKit::Utils::PriorityQueue do
       subject.push(5, 0.7, 2)
       subject.push(7, 2.8, 8)
 
-      expect(subject.peek_payload).to eql(2)
-      expect(subject.pop).to eql(5)
+      expect(subject.peek_payload).to be(2)
+      expect(subject.pop).to be(5)
 
-      expect(subject.peek_payload).to eql(4)
-      expect(subject.pop).to eql(7)
+      expect(subject.peek_payload).to be(4)
+      expect(subject.pop).to be(7)
 
-      expect(subject.peek_payload).to eql(5)
-      expect(subject.pop).to eql(6)
+      expect(subject.peek_payload).to be(5)
+      expect(subject.pop).to be(6)
 
-      expect(subject.peek_payload).to eql(-1)
-      expect(subject.pop).to eql(-1)
+      expect(subject.peek_payload).to be(-1)
+      expect(subject.pop).to be(-1)
     end
 
     it 'handles mixed push and pop' do
@@ -178,26 +178,26 @@ describe TspKit::Utils::PriorityQueue do
       subject.push(6, 1.8, 1)
       subject.push(5, 2.9, 2)
 
-      expect(subject.peek_payload).to eql(0)
-      expect(subject.pop).to eql(7)
+      expect(subject.peek_payload).to be(0)
+      expect(subject.pop).to be(7)
 
-      expect(subject.peek_payload).to eql(1)
-      expect(subject.pop).to eql(6)
+      expect(subject.peek_payload).to be(1)
+      expect(subject.pop).to be(6)
 
       subject.push(9, 3.3, 9)
       subject.push(8, 0.5, 8)
 
-      expect(subject.peek_payload).to eql(8)
-      expect(subject.pop).to eql(8)
+      expect(subject.peek_payload).to be(8)
+      expect(subject.pop).to be(8)
 
-      expect(subject.peek_payload).to eql(2)
-      expect(subject.pop).to eql(5)
+      expect(subject.peek_payload).to be(2)
+      expect(subject.pop).to be(5)
 
-      expect(subject.peek_payload).to eql(9)
-      expect(subject.pop).to eql(9)
+      expect(subject.peek_payload).to be(9)
+      expect(subject.pop).to be(9)
 
-      expect(subject.peek_payload).to eql(-1)
-      expect(subject.pop).to eql(-1)
+      expect(subject.peek_payload).to be(-1)
+      expect(subject.pop).to be(-1)
     end
 
     it 'ignores new priorities for completed items' do
@@ -205,28 +205,28 @@ describe TspKit::Utils::PriorityQueue do
       subject.push(6, 1.8, 4)
       subject.push(5, 2.9, 2)
 
-      expect(subject.peek_payload).to eql(5)
-      expect(subject.pop).to eql(7)
+      expect(subject.peek_payload).to be(5)
+      expect(subject.pop).to be(7)
 
-      expect(subject.peek_payload).to eql(4)
-      expect(subject.pop).to eql(6)
+      expect(subject.peek_payload).to be(4)
+      expect(subject.pop).to be(6)
 
       subject.push(7, 0.3, 9)
       subject.push(9, 3.3, 1)
       subject.push(8, 0.5, 12)
       subject.push(6, 0.8, 9)
 
-      expect(subject.peek_payload).to eql(12)
-      expect(subject.pop).to eql(8)
+      expect(subject.peek_payload).to be(12)
+      expect(subject.pop).to be(8)
 
-      expect(subject.peek_payload).to eql(2)
-      expect(subject.pop).to eql(5)
+      expect(subject.peek_payload).to be(2)
+      expect(subject.pop).to be(5)
 
-      expect(subject.peek_payload).to eql(1)
-      expect(subject.pop).to eql(9)
+      expect(subject.peek_payload).to be(1)
+      expect(subject.pop).to be(9)
 
-      expect(subject.peek_payload).to eql(-1)
-      expect(subject.pop).to eql(-1)
+      expect(subject.peek_payload).to be(-1)
+      expect(subject.pop).to be(-1)
     end
 
     [124_781, 12_414_325, 141_251, 431_251, 431_252, 431_253, 431_254, 431_255].each do |seed|
@@ -249,15 +249,15 @@ describe TspKit::Utils::PriorityQueue do
           collected << subject.pop
         end
 
-        expect(collected).to match_array [*0..9]
+        expect(collected).to match_array(0..9)
 
         10.times { |i| subject.push(i, rand, 3) }
-        expect(subject.pop).to eql(-1)
+        expect(subject.pop).to be(-1)
       end
 
       it "nothing bad happens if we try to over-fill a large queue (seed #{seed})" do
         srand(seed)
-        pq = TspKit::Utils::PriorityQueue.new(200)
+        pq = described_class.new(200)
         collected = []
 
         [*0..99].each do |i|
@@ -292,10 +292,10 @@ describe TspKit::Utils::PriorityQueue do
           collected << pq.pop
         end
 
-        expect(collected).to match_array [*0..199]
+        expect(collected).to match_array(0..199)
 
         10.times { |i| pq.push(i, rand, 5) }
-        expect(subject.pop).to eql(-1)
+        expect(subject.pop).to be(-1)
       end
     end
   end

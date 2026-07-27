@@ -42,15 +42,16 @@ describe TspKit::File::TspLib do
   end
 
   describe '.read_file' do
-    context "'a280.tsp'" do
+    context "with 'a280.tsp'" do
+      subject { described_class.read_file(path) }
+
       let(:path) { File.join(__dir__, '..', 'data', 'a280.tsp') }
-      subject { TspKit::File::TspLib.read_file(path) }
 
       it 'reads headers correctly' do
         expect(subject.name).to eql 'a280'
         expect(subject.comment).to eql 'drilling problem (Ludwig)'
         expect(subject.type).to eql 'TSP'
-        expect(subject.dimension).to eql 280
+        expect(subject.dimension).to be 280
         expect(subject.edge_weight_type).to eql 'EUC_2D'
       end
 
@@ -62,15 +63,16 @@ describe TspKit::File::TspLib do
       end
     end
 
-    context "'ch130.tsp'" do
+    context "with 'ch130.tsp'" do
+      subject { described_class.read_file(path) }
+
       let(:path) { File.join(__dir__, '..', 'data', 'ch130.tsp') }
-      subject { TspKit::File::TspLib.read_file(path) }
 
       it 'reads headers correctly' do
         expect(subject.name).to eql 'ch130'
         expect(subject.comment).to eql '130 city problem (Churritz)'
         expect(subject.type).to eql 'TSP'
-        expect(subject.dimension).to eql 130
+        expect(subject.dimension).to be 130
         expect(subject.edge_weight_type).to eql 'EUC_2D'
       end
 

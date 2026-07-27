@@ -1,9 +1,14 @@
+plugins:
+  - rubocop-rake
+  - rubocop-rspec
+
 AllCops:
   NewCops: enable
   TargetRubyVersion: 3.3
   Exclude:
     - "pkg/**/*"
     - "tmp/**/*"
+    - "vendor/**/*"
   SuggestExtensions: false
 
 Metrics/BlockLength:
@@ -64,3 +69,22 @@ Layout/LineLength:
 Lint/EmptyClass:
   Exclude:
     - "lib/tsp_kit/api_docs.rb"
+
+# The recovered suite intentionally keeps related assertions together and uses
+# named subjects heavily. Keep the RSpec plugin active while reflecting that
+# established test structure.
+RSpec/ExampleLength:
+  Max: 35
+
+RSpec/MultipleExpectations:
+  Max: 12
+
+RSpec/NamedSubject:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Max: 4
+
+# The historical suite is flat rather than mirroring lib/tsp_kit/.
+RSpec/SpecFilePathFormat:
+  Enabled: false

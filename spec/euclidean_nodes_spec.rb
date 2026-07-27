@@ -7,23 +7,23 @@ describe TspKit::Nodes::Euclidean do
   describe 'class methods' do
     describe '#new' do
       it 'creates an object of the correct type' do
-        expect(TspKit::Nodes::Euclidean.new(10, 3)).to be_a TspKit::Nodes::Euclidean
+        expect(described_class.new(10, 3)).to be_a described_class
       end
 
       it 'does not create anything if number of nodes is out of bounds' do
-        expect { TspKit::Nodes::Euclidean.new(1, 2) }.to raise_error ArgumentError
-        expect { TspKit::Nodes::Euclidean.new(-1, 2) }.to raise_error ArgumentError
-        expect { TspKit::Nodes::Euclidean.new(2**30, 2) }.to raise_error ArgumentError
+        expect { described_class.new(1, 2) }.to raise_error ArgumentError
+        expect { described_class.new(-1, 2) }.to raise_error ArgumentError
+        expect { described_class.new(2**30, 2) }.to raise_error ArgumentError
       end
 
       it 'does not create anything if number of dimensions is out of bounds' do
-        expect { TspKit::Nodes::Euclidean.new(10, 0) }.to raise_error ArgumentError
-        expect { TspKit::Nodes::Euclidean.new(10, 1) }.to raise_error ArgumentError
-        expect { TspKit::Nodes::Euclidean.new(20, 500) }.to raise_error ArgumentError
+        expect { described_class.new(10, 0) }.to raise_error ArgumentError
+        expect { described_class.new(10, 1) }.to raise_error ArgumentError
+        expect { described_class.new(20, 500) }.to raise_error ArgumentError
       end
 
       it 'creates a default locations array' do
-        nodes = TspKit::Nodes::Euclidean.new(10, 4)
+        nodes = described_class.new(10, 4)
         locations = nodes.locations
         expect(locations).to be_a Numo::DFloat
         expect(locations.shape).to eql [10, 4]
@@ -32,45 +32,45 @@ describe TspKit::Nodes::Euclidean do
 
     describe '#from_data' do
       it 'creates an object of the correct type' do
-        expect(TspKit::Nodes::Euclidean.from_data(
+        expect(described_class.from_data(
                  [
                    [1.0, 2.0], [2.0, 1.0], [0.0, 0.0]
                  ]
-               )).to be_a TspKit::Nodes::Euclidean
+               )).to be_a described_class
       end
 
       it 'stores supplied values as locations' do
-        nodes = TspKit::Nodes::Euclidean.from_data(
+        nodes = described_class.from_data(
           [
             [1.0, 2.0], [2.0, 1.0], [0.0, 0.0]
           ]
         )
 
-        expect(nodes.num_nodes).to eql 3
-        expect(nodes.num_dims).to eql 2
+        expect(nodes.num_nodes).to be 3
+        expect(nodes.num_dims).to be 2
         expect(nodes.locations[0..1, 1].to_a).to eql [2.0, 1.0]
       end
     end
 
     describe '#load' do
       it 'instantiates correctly from a file' do
-        original = TspKit::Nodes::Euclidean.from_data([[1, 2], [25, 15], [0, 0]])
+        original = described_class.from_data([[1, 2], [25, 15], [0, 0]])
         nodes = Tempfile.create do |file|
           original.save(file.path)
-          TspKit::Nodes::Euclidean.load(file.path)
+          described_class.load(file.path)
         end
 
-        expect(nodes).to be_a TspKit::Nodes::Euclidean
+        expect(nodes).to be_a described_class
 
-        expect(nodes.num_nodes).to eql 3
-        expect(nodes.num_dims).to eql 2
+        expect(nodes.num_nodes).to be 3
+        expect(nodes.num_dims).to be 2
         expect(nodes.locations[1, 0..1].to_a).to eql [25.0, 15.0]
       end
     end
   end
 
   describe 'instance methods' do
-    subject { TspKit::Nodes::Euclidean.from_data([[1, 2], [25, 15], [0, 0]]) }
+    subject { described_class.from_data([[1, 2], [25, 15], [0, 0]]) }
 
     describe '#random!' do
       it 'accepts one range per dimension' do
@@ -100,27 +100,27 @@ describe TspKit::Nodes::Euclidean do
       it 'makes a deep copy of locations' do
         copy = subject.clone
         expect(copy.locations).to be_narray_like subject.locations
-        expect(copy.locations).to_not be subject.locations
+        expect(copy.locations).not_to be subject.locations
       end
     end
 
     describe '#distance_between' do
-      subject { TspKit::Nodes::Euclidean.new(10, 2) }
+      subject { described_class.new(10, 2) }
 
-      before :each do
+      before do
         Numo::NArray.srand(12_324_124)
         subject.random!
       end
 
       it 'returns 0.0 for distance between node and itself' do
         [*0..9].each do |id|
-          expect(subject.distance_between(id, id)).to eql 0.0
+          expect(subject.distance_between(id, id)).to be 0.0
         end
       end
 
       [2, 3, 4, 5].each do |dim|
         it "matches distances calculated in Ruby for #{dim}D locations" do
-          nodes = TspKit::Nodes::Euclidean.new(10, dim)
+          nodes = described_class.new(10, dim)
           [*0..4].zip([*5..9]).each do |a_id, b_id|
             delta = nodes.locations[a_id, 0..(dim - 1)] - nodes.locations[b_id, 0..(dim - 1)]
             expected_distance = Math.sqrt((delta * delta).sum)
@@ -141,9 +141,9 @@ describe TspKit::Nodes::Euclidean do
     end
 
     describe '#all_distances_from' do
-      subject { TspKit::Nodes::Euclidean.new(10, 2) }
+      subject { described_class.new(10, 2) }
 
-      before :each do
+      before do
         Numo::NArray.srand(12_324_124)
         subject.random!
       end
@@ -155,9 +155,9 @@ describe TspKit::Nodes::Euclidean do
     end
 
     describe '#to_cost_matrix' do
-      subject { TspKit::Nodes::Euclidean.new(6, 3) }
+      subject { described_class.new(6, 3) }
 
-      before :each do
+      before do
         Numo::NArray.srand(12_324_124)
         subject.random!
       end
@@ -176,9 +176,9 @@ describe TspKit::Nodes::Euclidean do
     end
 
     describe '#to_distance_rank' do
-      subject { TspKit::Nodes::Euclidean.new(6, 3) }
+      subject { described_class.new(6, 3) }
 
-      before :each do
+      before do
         Numo::NArray.srand(12_324_124)
         subject.random!
       end

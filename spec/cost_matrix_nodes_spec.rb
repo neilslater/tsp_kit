@@ -7,17 +7,17 @@ describe TspKit::Nodes::CostMatrix do
   describe 'class methods' do
     describe '#new' do
       it 'creates an object of the correct type' do
-        expect(TspKit::Nodes::CostMatrix.new(10)).to be_a TspKit::Nodes::CostMatrix
+        expect(described_class.new(10)).to be_a described_class
       end
 
       it 'does not create anything if number of nodes is out of bounds' do
-        expect { TspKit::Nodes::CostMatrix.new(0) }.to raise_error ArgumentError
-        expect { TspKit::Nodes::CostMatrix.new(-10) }.to raise_error ArgumentError
-        expect { TspKit::Nodes::CostMatrix.new(100_000) }.to raise_error ArgumentError
+        expect { described_class.new(0) }.to raise_error ArgumentError
+        expect { described_class.new(-10) }.to raise_error ArgumentError
+        expect { described_class.new(100_000) }.to raise_error ArgumentError
       end
 
       it 'creates a default weights array' do
-        nodes = TspKit::Nodes::CostMatrix.new(10)
+        nodes = described_class.new(10)
         weights = nodes.weights
         expect(weights).to be_a Numo::DFloat
         expect(weights.shape).to eql [10, 10]
@@ -26,18 +26,18 @@ describe TspKit::Nodes::CostMatrix do
 
     describe '#from_data' do
       it 'creates an object of the correct type' do
-        expect(TspKit::Nodes::CostMatrix.from_data(
+        expect(described_class.from_data(
                  [
                    [0.0, 2.0, 3.0],
                    [2.0, 0.0, 1.5],
                    [3.0, 1.5, 0.0]
                  ]
-               )).to be_a TspKit::Nodes::CostMatrix
+               )).to be_a described_class
       end
 
       it 'raises an error if weights array is not symmetric' do
         expect do
-          TspKit::Nodes::CostMatrix.from_data(
+          described_class.from_data(
             [
               [0.0, 2.0, 3.0],
               [2.0, 0.0, 1.5],
@@ -49,7 +49,7 @@ describe TspKit::Nodes::CostMatrix do
 
       it 'raises an error if weights array is not right shape' do
         expect do
-          TspKit::Nodes::CostMatrix.from_data(
+          described_class.from_data(
             [
               [0.0, 2.0, 3.0],
               [2.0, 0.0, 1.5]
@@ -59,7 +59,7 @@ describe TspKit::Nodes::CostMatrix do
       end
 
       it 'stores supplied values as locations' do
-        nodes = TspKit::Nodes::CostMatrix.from_data(
+        nodes = described_class.from_data(
           [
             [0.0, 2.0, 3.0],
             [2.0, 0.0, 1.5],
@@ -67,24 +67,24 @@ describe TspKit::Nodes::CostMatrix do
           ]
         )
 
-        expect(nodes.num_nodes).to eql 3
+        expect(nodes.num_nodes).to be 3
         expect(nodes.weights[0..2, 1].to_a).to eql [2.0, 0.0, 1.5]
       end
     end
 
     describe '#load' do
       it 'instantiates correctly from a file' do
-        original = TspKit::Nodes::CostMatrix.from_data(
+        original = described_class.from_data(
           [[0, 2, 3], [2, 0, 1.5], [3, 1.5, 0]]
         )
         nodes = Tempfile.create do |file|
           original.save(file.path)
-          TspKit::Nodes::CostMatrix.load(file.path)
+          described_class.load(file.path)
         end
 
-        expect(nodes).to be_a TspKit::Nodes::CostMatrix
+        expect(nodes).to be_a described_class
 
-        expect(nodes.num_nodes).to eql 3
+        expect(nodes.num_nodes).to be 3
         expect(nodes.weights[0..2, 1].to_a).to eql [2.0, 0.0, 1.5]
       end
     end
@@ -92,7 +92,7 @@ describe TspKit::Nodes::CostMatrix do
 
   describe 'instance methods' do
     subject do
-      TspKit::Nodes::CostMatrix.from_data([[0, 2, 3], [2, 0, 1.5], [3, 1.5, 0]])
+      described_class.from_data([[0, 2, 3], [2, 0, 1.5], [3, 1.5, 0]])
     end
 
     describe '#clone' do
@@ -105,14 +105,14 @@ describe TspKit::Nodes::CostMatrix do
       it 'makes a deep copy of weights' do
         copy = subject.clone
         expect(copy.weights).to be_narray_like subject.weights
-        expect(copy.weights).to_not be subject.weights
+        expect(copy.weights).not_to be subject.weights
       end
     end
 
     describe '#distance_between' do
-      subject { TspKit::Nodes::CostMatrix.new(10) }
+      subject { described_class.new(10) }
 
-      before :each do
+      before do
         Numo::NArray.srand(12_324_124)
         subject.random!
       end
@@ -123,7 +123,7 @@ describe TspKit::Nodes::CostMatrix do
 
       it 'returns 0.0 for distance between node and itself' do
         [*0..9].each do |id|
-          expect(subject.distance_between(id, id)).to eql 0.0
+          expect(subject.distance_between(id, id)).to be 0.0
         end
       end
 
@@ -139,9 +139,9 @@ describe TspKit::Nodes::CostMatrix do
     end
 
     describe '#all_distances_from' do
-      subject { TspKit::Nodes::CostMatrix.new(10) }
+      subject { described_class.new(10) }
 
-      before :each do
+      before do
         Numo::NArray.srand(12_324_124)
         subject.random!
       end
@@ -152,9 +152,9 @@ describe TspKit::Nodes::CostMatrix do
     end
 
     describe '#to_distance_rank' do
-      subject { TspKit::Nodes::CostMatrix.new(10) }
+      subject { described_class.new(10) }
 
-      before :each do
+      before do
         Numo::NArray.srand(12_324_124)
         subject.random!
       end

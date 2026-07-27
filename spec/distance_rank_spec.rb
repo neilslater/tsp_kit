@@ -7,19 +7,19 @@ describe TspKit::DistanceRank do
   describe 'class methods' do
     describe '#new' do
       it 'creates an object of the correct type' do
-        expect(TspKit::DistanceRank.new(10, 9)).to be_a TspKit::DistanceRank
+        expect(described_class.new(10, 9)).to be_a described_class
       end
 
       it 'does not create anything if number of nodes is out of bounds' do
-        expect { TspKit::DistanceRank.new(1, 2) }.to raise_error ArgumentError
-        expect { TspKit::DistanceRank.new(-1, 2) }.to raise_error ArgumentError
-        expect { TspKit::DistanceRank.new(2**30, 2) }.to raise_error ArgumentError
+        expect { described_class.new(1, 2) }.to raise_error ArgumentError
+        expect { described_class.new(-1, 2) }.to raise_error ArgumentError
+        expect { described_class.new(2**30, 2) }.to raise_error ArgumentError
       end
 
       it 'does not create anything if number of dimensions is out of bounds' do
-        expect { TspKit::DistanceRank.new(10, 10) }.to raise_error ArgumentError
-        expect { TspKit::DistanceRank.new(10, 1) }.to raise_error ArgumentError
-        expect { TspKit::DistanceRank.new(20, 500) }.to raise_error ArgumentError
+        expect { described_class.new(10, 10) }.to raise_error ArgumentError
+        expect { described_class.new(10, 1) }.to raise_error ArgumentError
+        expect { described_class.new(20, 500) }.to raise_error ArgumentError
       end
 
       it 'creates a default locations array' do
@@ -32,45 +32,45 @@ describe TspKit::DistanceRank do
 
     describe '#from_data' do
       it 'creates an object of the correct type' do
-        expect(TspKit::DistanceRank.from_data(
+        expect(described_class.from_data(
                  [
                    [1, 2], [0, 2], [0, 1]
                  ]
-               )).to be_a TspKit::DistanceRank
+               )).to be_a described_class
       end
 
       it 'stores supplied values as closest_nodes' do
-        dr = TspKit::DistanceRank.from_data(
+        dr = described_class.from_data(
           [
             [1, 2], [0, 2], [0, 1]
           ]
         )
 
-        expect(dr.num_nodes).to eql 3
-        expect(dr.max_rank).to eql 2
+        expect(dr.num_nodes).to be 3
+        expect(dr.max_rank).to be 2
         expect(dr.closest_nodes[1, 0..1].to_a).to eql [0, 2]
       end
     end
 
     describe '#load' do
       it 'instantiates correctly from a file' do
-        original = TspKit::DistanceRank.from_data([[1, 2], [0, 2], [0, 1]])
+        original = described_class.from_data([[1, 2], [0, 2], [0, 1]])
         dr = Tempfile.create do |file|
           original.save(file.path)
-          TspKit::DistanceRank.load(file.path)
+          described_class.load(file.path)
         end
 
-        expect(dr).to be_a TspKit::DistanceRank
+        expect(dr).to be_a described_class
 
-        expect(dr.num_nodes).to eql 3
-        expect(dr.max_rank).to eql 2
+        expect(dr.num_nodes).to be 3
+        expect(dr.max_rank).to be 2
         expect(dr.closest_nodes[1, 0..1].to_a).to eql [0, 2]
       end
     end
   end
 
   describe 'instance methods' do
-    subject { TspKit::DistanceRank.from_data([[1, 2], [0, 2], [0, 1]]) }
+    subject { described_class.from_data([[1, 2], [0, 2], [0, 1]]) }
 
     describe '#clone' do
       it 'copies everything' do
@@ -83,18 +83,19 @@ describe TspKit::DistanceRank do
       it 'makes a deep copy of closest_nodes' do
         copy = subject.clone
         expect(copy.closest_nodes).to be_narray_like subject.closest_nodes
-        expect(copy.closest_nodes).to_not be subject.closest_nodes
+        expect(copy.closest_nodes).not_to be subject.closest_nodes
       end
     end
 
     describe '#resize' do
+      subject { nodes.to_distance_rank(4) }
+
       let(:nodes) do
         Numo::NArray.srand(12_324_124)
         n = TspKit::Nodes::Euclidean.new(6, 3)
         n.random!
         n
       end
-      subject { nodes.to_distance_rank(4) }
 
       it 'can reduce number of closest items stored' do
         expected = subject.closest_nodes[true, 0...2].dup
@@ -122,6 +123,7 @@ describe TspKit::DistanceRank do
           n.random!
           n
         end
+
         it 'ensures that connections are bidirectional' do
           subject.bidirectional(nodes, 2)
           expect_bidirectional_connections(subject)
@@ -137,6 +139,7 @@ describe TspKit::DistanceRank do
           n.random!
           n
         end
+
         it 'ensures that connections are bidirectional' do
           subject.bidirectional(nodes, 4)
           expect_bidirectional_connections(subject)

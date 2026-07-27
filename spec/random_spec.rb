@@ -5,7 +5,7 @@ require 'helpers'
 describe TspKit do
   describe 'random number generator' do
     it 'seeds its native state when loaded' do
-      expect(TspKit).to be_rng_seeded
+      expect(described_class).to be_rng_seeded
     end
 
     it 'generates numbers consistently when seeded' do
@@ -17,8 +17,8 @@ describe TspKit do
       ]
 
       inputs.each do |seed, expected_results|
-        TspKit.srand(seed)
-        got_results = expected_results.map { |_e| TspKit.rand }
+        described_class.srand(seed)
+        got_results = expected_results.map { |_e| described_class.rand }
         got_results.zip(expected_results).each do |got_val, expected_val|
           expect(got_val).to be_within(1e-6).of expected_val
         end
@@ -35,8 +35,8 @@ describe TspKit do
       ]
 
       inputs.each do |seed, expected_results|
-        TspKit.srand_array(seed)
-        got_results = expected_results.map { |_e| TspKit.rand }
+        described_class.srand_array(seed)
+        got_results = expected_results.map { |_e| described_class.rand }
         got_results.zip(expected_results).each do |got_val, expected_val|
           expect(got_val).to be_within(1e-6).of expected_val
         end
@@ -54,8 +54,8 @@ describe TspKit do
       ]
 
       inputs.each do |seed, expected_results|
-        TspKit.srand(seed)
-        got_results = expected_results.map { |_e| TspKit.randn }
+        described_class.srand(seed)
+        got_results = expected_results.map { |_e| described_class.randn }
         got_results.zip(expected_results).each do |got_val, expected_val|
           expect(got_val).to be_within(1e-6).of expected_val
         end
@@ -73,17 +73,17 @@ describe TspKit do
       ]
 
       inputs.each do |seed, expected_results|
-        TspKit.srand(seed)
+        described_class.srand(seed)
         narray = Numo::Int32[*0..9]
-        TspKit.shuffle_narray(narray)
+        described_class.shuffle_narray(narray)
         expect(narray.to_a).to eql expected_results
       end
     end
 
     it 'can shuffle a large array' do
-      TspKit.srand(1_234_621)
+      described_class.srand(1_234_621)
       narray = Numo::Int32.zeros(200_000).seq
-      TspKit.shuffle_narray(narray)
+      described_class.shuffle_narray(narray)
       expect(narray[500..519].to_a).to eql [37_544, 132_336, 13_460, 78_671, 46_310, 44_317, 126_946,
                                             113_401, 45_819, 56_437, 69_486, 18_315, 20_744, 172_846,
                                             54_965, 82_657, 70_511, 5599, 44_508, 27_858]

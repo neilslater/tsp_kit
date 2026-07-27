@@ -13,7 +13,7 @@
 static const rb_data_type_t distance_rank_data_type = {
   "TspKit::DistanceRank",
   { (RUBY_DATA_FUNC)distance_rank__gc_mark, (RUBY_DATA_FUNC)distance_rank__destroy, NULL,
-    (RUBY_DATA_FUNC)distance_rank__gc_compact },
+    (RUBY_DATA_FUNC)distance_rank__gc_compact, { NULL } },
   NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
 };
 

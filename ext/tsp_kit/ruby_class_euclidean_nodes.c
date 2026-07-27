@@ -13,7 +13,7 @@
 static const rb_data_type_t euclidean_nodes_data_type = {
   "TspKit::Nodes::Euclidean",
   { (RUBY_DATA_FUNC)euclidean_nodes__gc_mark, (RUBY_DATA_FUNC)euclidean_nodes__destroy, NULL,
-    (RUBY_DATA_FUNC)euclidean_nodes__gc_compact },
+    (RUBY_DATA_FUNC)euclidean_nodes__gc_compact, { NULL } },
   NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
 };
 

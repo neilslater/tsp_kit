@@ -11,7 +11,7 @@
 static const rb_data_type_t one_tree_data_type = {
   "TspKit::OneTree",
   { (RUBY_DATA_FUNC)one_tree__gc_mark, (RUBY_DATA_FUNC)one_tree__destroy, NULL,
-    (RUBY_DATA_FUNC)one_tree__gc_compact },
+    (RUBY_DATA_FUNC)one_tree__gc_compact, { NULL } },
   NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
 };
 

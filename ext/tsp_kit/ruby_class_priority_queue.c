@@ -10,7 +10,8 @@
 
 static const rb_data_type_t priority_queue_data_type = {
   "TspKit::PriorityQueue",
-  { (RUBY_DATA_FUNC)priority_queue__gc_mark, (RUBY_DATA_FUNC)priority_queue__destroy, NULL },
+  { (RUBY_DATA_FUNC)priority_queue__gc_mark, (RUBY_DATA_FUNC)priority_queue__destroy, NULL, NULL,
+    { NULL } },
   NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
 };
 

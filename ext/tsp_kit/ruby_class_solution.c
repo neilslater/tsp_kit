@@ -11,7 +11,7 @@
 static const rb_data_type_t solution_data_type = {
   "TspKit::Solution",
   { (RUBY_DATA_FUNC)solution__gc_mark, (RUBY_DATA_FUNC)solution__destroy, NULL,
-    (RUBY_DATA_FUNC)solution__gc_compact },
+    (RUBY_DATA_FUNC)solution__gc_compact, { NULL } },
   NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
 };
 

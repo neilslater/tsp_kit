@@ -12,7 +12,7 @@
 static const rb_data_type_t cost_matrix_data_type = {
   "TspKit::Nodes::CostMatrix",
   { (RUBY_DATA_FUNC)cost_matrix__gc_mark, (RUBY_DATA_FUNC)cost_matrix__destroy, NULL,
-    (RUBY_DATA_FUNC)cost_matrix__gc_compact },
+    (RUBY_DATA_FUNC)cost_matrix__gc_compact, { NULL } },
   NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
 };
 

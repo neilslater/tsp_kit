@@ -10,7 +10,8 @@
 
 static const rb_data_type_t greedy_solver_data_type = {
   "TspKit::GreedySolver",
-  { (RUBY_DATA_FUNC)greedy_solver__gc_mark, (RUBY_DATA_FUNC)greedy_solver__destroy, NULL },
+  { (RUBY_DATA_FUNC)greedy_solver__gc_mark, (RUBY_DATA_FUNC)greedy_solver__destroy, NULL, NULL,
+    { NULL } },
   NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
 };
 

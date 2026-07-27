@@ -520,9 +520,9 @@ void one_tree__generate_alpha_ranking( OneTree *tree, NodeType ntype, void *node
     alpha_buffer[from_node_id] = -DBL_MAX;
 
     if ( tree->parents[0] == i || tree->parents[1] == i ) {
-      alpha_buffer[tree_idx_one_node_id] = 0.00001 * one_tree__alpha_distance( tree, from_node_id, to_node_id, use_penalties );
+      alpha_buffer[tree_idx_one_node_id] = 0.00001 * one_tree__alpha_distance( tree, from_node_id, tree_idx_one_node_id, use_penalties );
     } else {
-      c = one_tree__alpha_distance( tree, from_node_id, to_node_id, use_penalties );
+      c = one_tree__alpha_distance( tree, from_node_id, tree_idx_one_node_id, use_penalties );
       alpha_buffer[tree_idx_one_node_id] = 1.00001 * c - tree_idx_one_longest_c;
     }
 

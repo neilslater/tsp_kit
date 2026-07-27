@@ -10,8 +10,15 @@
 //  struct_euclidean_nodes.c
 //
 
+static const rb_data_type_t euclidean_nodes_data_type = {
+  "TspKit::Nodes::Euclidean",
+  { (RUBY_DATA_FUNC)euclidean_nodes__gc_mark, (RUBY_DATA_FUNC)euclidean_nodes__destroy, NULL,
+    (RUBY_DATA_FUNC)euclidean_nodes__gc_compact },
+  NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 VALUE euclidean_nodes_as_ruby_class( EuclideanNodes *euclidean_nodes , VALUE klass ) {
-  return Data_Wrap_Struct( klass, euclidean_nodes__gc_mark, euclidean_nodes__destroy, euclidean_nodes );
+  return TypedData_Wrap_Struct( klass, &euclidean_nodes_data_type, euclidean_nodes );
 }
 
 VALUE euclidean_nodes_alloc(VALUE klass) {
@@ -20,15 +27,18 @@ VALUE euclidean_nodes_alloc(VALUE klass) {
 
 EuclideanNodes *get_euclidean_nodes_struct( VALUE obj ) {
   EuclideanNodes *euclidean_nodes;
-  Data_Get_Struct( obj, EuclideanNodes, euclidean_nodes );
+  TypedData_Get_Struct( obj, EuclideanNodes, &euclidean_nodes_data_type, euclidean_nodes );
   return euclidean_nodes;
 }
 
 void assert_value_wraps_euclidean_nodes( VALUE obj ) {
-  if ( TYPE(obj) != T_DATA ||
-      RDATA(obj)->dfree != (RUBY_DATA_FUNC)euclidean_nodes__destroy) {
+  if (!value_wraps_euclidean_nodes(obj)) {
     rb_raise( rb_eTypeError, "Expected a EuclideanNodes object, but got something else" );
   }
+}
+
+bool value_wraps_euclidean_nodes(VALUE obj) {
+  return rb_typeddata_is_kind_of(obj, &euclidean_nodes_data_type);
 }
 
 /* Document-class: TspKit::EuclideanNodes
@@ -101,7 +111,7 @@ VALUE euclidean_nodes_rbobject__get_num_dims( VALUE self ) {
 
 /* @!attribute [r] locations
  * Description goes here
- * @return [NArray<float>]
+ * @return [Numo::DFloat]
  */
 VALUE euclidean_nodes_rbobject__get_narr_locations( VALUE self ) {
   EuclideanNodes *euclidean_nodes = get_euclidean_nodes_struct( self );
@@ -109,24 +119,24 @@ VALUE euclidean_nodes_rbobject__get_narr_locations( VALUE self ) {
 }
 
 /* @overload from_data( locations )
- * Creates new TspKit::Nodes::Euclidean object directly from NArray of locations
+ * Creates a TspKit::Nodes::Euclidean from a two-dimensional Numo array.
  *
  * @return [TspKit::Nodes::Euclidean] new instance
  */
 VALUE euclidean_nodes_rbclass__from_data( VALUE self, VALUE rv_locations) {
-  struct NARRAY *narr;
+  narray_t *narr;
   int num_nodes, num_dims;
   VALUE rv_nodes;
   EuclideanNodes *nodes;
 
-  rv_locations = na_cast_object(rv_locations, NA_DFLOAT);
-  GetNArray( rv_locations, narr );
-  if (narr->rank != 2) {
-    rb_raise(rb_eArgError, "locations array should have rank 2, but is rank %d", narr->rank);
+  rv_locations = tsp_numo_cast(numo_cDFloat, rv_locations);
+  narr = tsp_numo_metadata(rv_locations);
+  if (narr->ndim != 2) {
+    rb_raise(rb_eArgError, "locations array should have rank 2, but is rank %d", narr->ndim);
   }
 
-  num_dims = narr->shape[0];
-  num_nodes = narr->shape[1];
+  num_nodes = (int)narr->shape[0];
+  num_dims = (int)narr->shape[1];
 
   if (num_nodes < 3 || num_nodes > 10000000) {
     rb_raise(rb_eArgError, "num_nodes %d is outside accepted range 3..10000000", num_nodes);
@@ -141,10 +151,10 @@ VALUE euclidean_nodes_rbclass__from_data( VALUE self, VALUE rv_locations) {
   nodes->num_nodes = num_nodes;
   nodes->num_dims = num_dims;
   nodes->narr_locations = rv_locations;
-  nodes->locations = (double *) narr->ptr;
+  nodes->locations = (double *)tsp_numo_read_write_pointer(rv_locations);
   nodes->locations_shape = ALLOC_N( int, 2 );
-  nodes->locations_shape[0] = num_dims;
-  nodes->locations_shape[1] = num_nodes;
+  nodes->locations_shape[0] = num_nodes;
+  nodes->locations_shape[1] = num_dims;
   return rv_nodes;
 }
 
@@ -174,12 +184,11 @@ VALUE euclidean_nodes_rbobject__distance_between( VALUE self, VALUE rv_node_a_id
 /* @overload all_distances_from( node_id )
  * Returns distance metric from one node to all other nodes.
  * @param [Integer] node_id node to measure from
- * @return [NArray] all distances from given node, indexed by destination node_id
+ * @return [Numo::DFloat] all distances from given node
  */
 VALUE euclidean_nodes_rbobject__all_distances_from( VALUE self, VALUE rv_node_id ) {
   int node_id;
   VALUE rv_result;
-  struct NARRAY *narr;
   int shape[1] = { 0 };
   EuclideanNodes *euclidean_nodes = get_euclidean_nodes_struct( self );
 
@@ -189,9 +198,10 @@ VALUE euclidean_nodes_rbobject__all_distances_from( VALUE self, VALUE rv_node_id
   }
 
   shape[0] = euclidean_nodes->num_nodes;
-  rv_result = na_make_object( NA_DFLOAT, 1, shape, cNArray );
-  GetNArray( rv_result, narr );
-  euclidean_nodes__all_distances_from( euclidean_nodes, node_id, (double*) narr->ptr );
+  rv_result = tsp_numo_new(numo_cDFloat, 1, shape);
+  euclidean_nodes__all_distances_from(
+    euclidean_nodes, node_id, (double *)tsp_numo_write_pointer(rv_result)
+  );
   return rv_result;
 }
 

@@ -4,7 +4,7 @@
 #define RUBY_CLASS_GREEDY_SOLVER_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "struct_greedy_solver.h"
 #include "shared_vars.h"
 

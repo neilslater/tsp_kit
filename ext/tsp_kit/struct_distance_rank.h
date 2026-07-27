@@ -9,7 +9,7 @@
 #define STRUCT_DISTANCE_RANK_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 
 typedef struct _distance_rank_raw {
   int num_nodes;
@@ -28,6 +28,7 @@ void distance_rank__init( DistanceRank *distance_rank, int num_nodes, int max_ra
 void distance_rank__destroy( DistanceRank *distance_rank );
 
 void distance_rank__gc_mark( DistanceRank *distance_rank );
+void distance_rank__gc_compact( DistanceRank *distance_rank );
 
 void distance_rank__deep_copy( DistanceRank *distance_rank_copy, DistanceRank *distance_rank_orig );
 

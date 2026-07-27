@@ -1,35 +1,43 @@
+PATH
+  remote: .
+  specs:
+    tsp_kit (0.0.1)
+      csv (~> 3.3)
+      numo-narray-alt (= 0.10.5)
+
 GEM
   remote: https://rubygems.org/
   specs:
-    diff-lcs (1.4.4)
-    narray (0.6.1.2)
-    rake (13.0.6)
-    rake-compiler (1.1.1)
+    csv (3.3.5)
+    diff-lcs (1.6.2)
+    numo-narray-alt (0.10.5)
+    rake (13.4.2)
+    rake-compiler (1.3.1)
       rake
-    rspec (3.10.0)
-      rspec-core (~> 3.10.0)
-      rspec-expectations (~> 3.10.0)
-      rspec-mocks (~> 3.10.0)
-    rspec-core (3.10.1)
-      rspec-support (~> 3.10.0)
-    rspec-expectations (3.10.1)
+    rspec (3.13.2)
+      rspec-core (~> 3.13.0)
+      rspec-expectations (~> 3.13.0)
+      rspec-mocks (~> 3.13.0)
+    rspec-core (3.13.6)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.5)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.10.0)
-    rspec-mocks (3.10.2)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.8)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.10.0)
-    rspec-support (3.10.2)
-    yard (0.9.26)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.7)
+    yard (0.9.45)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  narray (>= 0.6.0.8)
-  rake (>= 1.9.1)
-  rake-compiler (>= 0.8.3)
-  rspec (>= 2.13.0)
-  yard (>= 0.8.7.2)
+  rake (~> 13.2)
+  rake-compiler (~> 1.3)
+  rspec (~> 3.13)
+  tsp_kit!
+  yard (~> 0.9)
 
 BUNDLED WITH
-   2.2.14
+  4.0.16

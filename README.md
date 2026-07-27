@@ -9,19 +9,37 @@ http://akira.ruc.dk/~keld/research/LKH/LKH-2.0/DOC/LKH_REPORT.pdf
 
 ## Installation
 
- * You need a Ruby interpreter, recommended version 2.1.4 or higher, with support for compiling native extensions.
+TspKit currently targets Ruby 4.0.6 and uses
+[`numo-narray-alt`](https://rubygems.org/gems/numo-narray-alt) 0.10.5.
+A C compiler and the normal Ruby native-extension build tools are required.
 
- * Copy this repo locally, and make the directory with the README.md your current directory
+Install the gem:
 
- * Install dependencies:
+```sh
+gem install tsp_kit
+```
 
-    $ bundle install
+For development, install dependencies and run a clean build:
 
- * Compile and test:
+```sh
+bundle install
+bundle exec rake clobber
+bundle exec rake
+```
 
-    $ bundle exec rake
+The final command compiles the C extension and runs the complete spec suite.
+Run `bundle exec rake gem` to build `pkg/tsp_kit-0.0.1.gem`.
 
-This should compile the C code, and run the unit tests.
+## Array API
+
+Public numerical values use explicit Numo types:
+
+- coordinates, weights, penalties, and distances use `Numo::DFloat`;
+- node identifiers, ranks, and solution indexes use `Numo::Int32`;
+- two-dimensional arrays use conventional row-major shapes. For example,
+  Euclidean coordinates have shape `[num_nodes, num_dims]`.
+
+Legacy top-level `NArray` values and legacy Marshal files are not supported.
 
 ## Contributing
 

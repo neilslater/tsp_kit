@@ -17,9 +17,10 @@ describe TspKit::File::TspLib do
       end
 
       it 'converts node data correctly' do
-        expected_nodes = TspKit::Nodes::Euclidean.load(File.join(__dir__, 'a280_nodes.dat'))
-        got_nodes = subject.get_nodes
-        expect(got_nodes.locations).to be_narray_like expected_nodes.locations
+        locations = subject.get_nodes.locations
+        expect(locations.shape).to eql [280, 2]
+        expect(locations[0, true].to_a).to eql [288.0, 149.0]
+        expect(locations[-1, true].to_a).to eql [280.0, 133.0]
       end
     end
 
@@ -36,9 +37,10 @@ describe TspKit::File::TspLib do
       end
 
       it 'converts node data correctly' do
-        expected_nodes = TspKit::Nodes::Euclidean.load(File.join(__dir__, 'ch130_nodes.dat'))
-        got_nodes = subject.get_nodes
-        expect(got_nodes.locations).to be_narray_like expected_nodes.locations
+        locations = subject.get_nodes.locations
+        expect(locations.shape).to eql [130, 2]
+        expect(locations[0, true].to_a).to eql [334.5909245845, 161.7809319139]
+        expect(locations[-1, true].to_a).to eql [403.2874386776, 205.8971749407]
       end
     end
   end

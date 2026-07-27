@@ -1,30 +1,6 @@
 # frozen_string_literal: true
 
-require 'narray'
-
-# TspKit adds support for Marshal to NArray.
-# Code originally from http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/194510
-class NArray
-  def _dump(*_ignored)
-    Marshal.dump typecode: typecode, shape: shape, data: to_s
-  end
-
-  def self._load(buf)
-    h = Marshal.load buf
-    typecode = h[:typecode]
-    shape = h[:shape]
-    data = h[:data]
-    to_na data, typecode, *shape
-  end
-
-  def save(filename)
-    File.open(filename, 'wb') { |file| Marshal.dump(self, file) }
-  end
-
-  def self.load(filename)
-    File.open(filename, 'rb') { |file| Marshal.load(file) }
-  end
-end
+require 'numo/narray/alt'
 
 module TspKit
   module MarshalSupport
@@ -34,7 +10,7 @@ module TspKit
     end
 
     def save(filename)
-      File.open(filename, 'wb') { |file| Marshal.dump(self, file) }
+      ::File.open(filename, 'wb') { |file| Marshal.dump(self, file) }
     end
 
     def self.included(base)
@@ -49,14 +25,14 @@ module TspKit
       end
 
       def load(filename)
-        File.open(filename, 'rb') { |file| Marshal.load(file) }
+        ::File.open(filename, 'rb') { |file| Marshal.load(file) }
       end
     end
   end
 end
 
 module TspKit
-  module Nodes
+  class Nodes
     class Euclidean
       include TspKit::MarshalSupport
       # @!visibility private
@@ -77,7 +53,7 @@ module TspKit
 end
 
 module TspKit
-  module Nodes
+  class Nodes
     class CostMatrix
       include TspKit::MarshalSupport
       # @!visibility private

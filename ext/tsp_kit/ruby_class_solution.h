@@ -4,7 +4,7 @@
 #define RUBY_CLASS_SOLUTION_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "struct_solution.h"
 #include "shared_vars.h"
 

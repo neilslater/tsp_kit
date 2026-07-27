@@ -10,8 +10,15 @@
 //  struct_distance_rank.c
 //
 
+static const rb_data_type_t distance_rank_data_type = {
+  "TspKit::DistanceRank",
+  { (RUBY_DATA_FUNC)distance_rank__gc_mark, (RUBY_DATA_FUNC)distance_rank__destroy, NULL,
+    (RUBY_DATA_FUNC)distance_rank__gc_compact },
+  NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
+};
+
 VALUE distance_rank_as_ruby_class( DistanceRank *distance_rank , VALUE klass ) {
-  return Data_Wrap_Struct( klass, distance_rank__gc_mark, distance_rank__destroy, distance_rank );
+  return TypedData_Wrap_Struct( klass, &distance_rank_data_type, distance_rank );
 }
 
 VALUE distance_rank_alloc(VALUE klass) {
@@ -20,13 +27,12 @@ VALUE distance_rank_alloc(VALUE klass) {
 
 DistanceRank *get_distance_rank_struct( VALUE obj ) {
   DistanceRank *distance_rank;
-  Data_Get_Struct( obj, DistanceRank, distance_rank );
+  TypedData_Get_Struct( obj, DistanceRank, &distance_rank_data_type, distance_rank );
   return distance_rank;
 }
 
 void assert_value_wraps_distance_rank( VALUE obj ) {
-  if ( TYPE(obj) != T_DATA ||
-      RDATA(obj)->dfree != (RUBY_DATA_FUNC)distance_rank__destroy) {
+  if (!rb_typeddata_is_kind_of(obj, &distance_rank_data_type)) {
     rb_raise( rb_eTypeError, "Expected a DistanceRank object, but got something else" );
   }
 }
@@ -102,7 +108,7 @@ VALUE distance_rank_rbobject__get_max_rank( VALUE self ) {
 
 /* @!attribute [r] closest_nodes
  * Description goes here
- * @return [NArray<int>]
+ * @return [Numo::Int32]
  */
 VALUE distance_rank_rbobject__get_narr_closest_nodes( VALUE self ) {
   DistanceRank *distance_rank = get_distance_rank_struct( self );
@@ -113,24 +119,24 @@ VALUE distance_rank_rbobject__get_narr_closest_nodes( VALUE self ) {
 
 
 /* @overload from_data( closest_nodes )
- * Creates new TspKit::DistanceRank object directly from NArray of closest_nodes
+ * Creates a TspKit::DistanceRank from a two-dimensional Numo array.
  *
  * @return [TspKit::DistanceRank] new instance
  */
 VALUE distance_rank_rbclass__from_data( VALUE self, VALUE rv_closest_nodes) {
-  struct NARRAY *narr;
+  narray_t *narr;
   int num_nodes, max_rank;
   VALUE rv_dr;
   DistanceRank *dr;
 
-  rv_closest_nodes = na_cast_object(rv_closest_nodes, NA_LINT);
-  GetNArray( rv_closest_nodes, narr );
-  if (narr->rank != 2) {
-    rb_raise(rb_eArgError, "closest_nodes array should have rank 2, but is rank %d", narr->rank);
+  rv_closest_nodes = tsp_numo_cast(numo_cInt32, rv_closest_nodes);
+  narr = tsp_numo_metadata(rv_closest_nodes);
+  if (narr->ndim != 2) {
+    rb_raise(rb_eArgError, "closest_nodes array should have rank 2, but is rank %d", narr->ndim);
   }
 
-  max_rank = narr->shape[0];
-  num_nodes = narr->shape[1];
+  num_nodes = (int)narr->shape[0];
+  max_rank = (int)narr->shape[1];
 
   if (num_nodes < 3 || num_nodes > 10000000) {
     rb_raise(rb_eArgError, "num_nodes %d is outside accepted range 3..10000000", num_nodes);
@@ -147,10 +153,10 @@ VALUE distance_rank_rbclass__from_data( VALUE self, VALUE rv_closest_nodes) {
   dr->num_nodes = num_nodes;
   dr->max_rank = max_rank;
   dr->narr_closest_nodes = rv_closest_nodes;
-  dr->closest_nodes = (int *) narr->ptr;
+  dr->closest_nodes = (int *)tsp_numo_read_write_pointer(rv_closest_nodes);
   dr->closest_nodes_shape = ALLOC_N( int, 2 );
-  dr->closest_nodes_shape[0] = max_rank;
-  dr->closest_nodes_shape[1] = num_nodes;
+  dr->closest_nodes_shape[0] = num_nodes;
+  dr->closest_nodes_shape[1] = max_rank;
   return rv_dr;
 }
 

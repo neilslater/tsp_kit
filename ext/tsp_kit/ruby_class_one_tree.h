@@ -4,7 +4,7 @@
 #define RUBY_CLASS_ONE_TREE_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "struct_one_tree.h"
 #include "shared_vars.h"
 

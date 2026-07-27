@@ -77,7 +77,7 @@ describe TspKit do
 
       inputs.each do |seed, expected_results|
         TspKit.srand(seed)
-        narray = NArray[*0..9]
+        narray = Numo::Int32[*0..9]
         TspKit.shuffle_narray(narray)
         expect(narray.to_a).to eql expected_results
       end
@@ -85,7 +85,7 @@ describe TspKit do
 
     it 'can shuffle a large array' do
       TspKit.srand(1_234_621)
-      narray = NArray.int(200_000).indgen!
+      narray = Numo::Int32.zeros(200_000).seq
       TspKit.shuffle_narray(narray)
       expect(narray[500..519].to_a).to eql [37_544, 132_336, 13_460, 78_671, 46_310, 44_317, 126_946,
                                             113_401, 45_819, 56_437, 69_486, 18_315, 20_744, 172_846,

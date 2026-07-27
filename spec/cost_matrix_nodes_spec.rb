@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'helpers'
+require 'tempfile'
 
 describe TspKit::Nodes::CostMatrix do
   describe 'class methods' do
@@ -18,7 +19,7 @@ describe TspKit::Nodes::CostMatrix do
       it 'creates a default weights array' do
         nodes = TspKit::Nodes::CostMatrix.new(10)
         weights = nodes.weights
-        expect(weights).to be_a NArray
+        expect(weights).to be_a Numo::DFloat
         expect(weights.shape).to eql [10, 10]
       end
     end
@@ -73,8 +74,13 @@ describe TspKit::Nodes::CostMatrix do
 
     describe '#load' do
       it 'instantiates correctly from a file' do
-        filename = File.join(__dir__, 'test_cost_matrix_01.dat')
-        nodes = TspKit::Nodes::CostMatrix.load(filename)
+        original = TspKit::Nodes::CostMatrix.from_data(
+          [[0, 2, 3], [2, 0, 1.5], [3, 1.5, 0]]
+        )
+        nodes = Tempfile.create do |file|
+          original.save(file.path)
+          TspKit::Nodes::CostMatrix.load(file.path)
+        end
 
         expect(nodes).to be_a TspKit::Nodes::CostMatrix
 
@@ -85,8 +91,9 @@ describe TspKit::Nodes::CostMatrix do
   end
 
   describe 'instance methods' do
-    let(:test_filename) { File.join(__dir__, 'test_cost_matrix_01.dat') }
-    subject { TspKit::Nodes::CostMatrix.load(test_filename) }
+    subject do
+      TspKit::Nodes::CostMatrix.from_data([[0, 2, 3], [2, 0, 1.5], [3, 1.5, 0]])
+    end
 
     describe '#clone' do
       it 'copies everything' do
@@ -106,12 +113,12 @@ describe TspKit::Nodes::CostMatrix do
       subject { TspKit::Nodes::CostMatrix.new(10) }
 
       before :each do
-        NArray.srand(12_324_124)
+        Numo::NArray.srand(12_324_124)
         subject.random!
       end
 
       it 'returns expected distance between two nodes' do
-        expect(subject.distance_between(7, 8)).to be_within(1e-8).of 73.640420037
+        expect(subject.distance_between(7, 8)).to eql subject.weights[7, 8]
       end
 
       it 'returns 0.0 for distance between node and itself' do
@@ -135,18 +142,12 @@ describe TspKit::Nodes::CostMatrix do
       subject { TspKit::Nodes::CostMatrix.new(10) }
 
       before :each do
-        NArray.srand(12_324_124)
+        Numo::NArray.srand(12_324_124)
         subject.random!
       end
 
-      it 'returns a NArray of distances from a given node' do
-        expect(subject.all_distances_from(0)).to be_narray_like(
-          NArray[
-            0.0, 67.2541202375928, 43.17326578613411, 40.179165918528454, 53.31342434092694,
-            19.543237018782378, 39.49916997221163, 12.314355444931753, 55.823551753117755,
-            46.837376341983465
-          ]
-        )
+      it 'returns a Numo::DFloat of distances from a given node' do
+        expect(subject.all_distances_from(0)).to be_narray_like(subject.weights[0, true])
       end
     end
 
@@ -154,7 +155,7 @@ describe TspKit::Nodes::CostMatrix do
       subject { TspKit::Nodes::CostMatrix.new(10) }
 
       before :each do
-        NArray.srand(12_324_124)
+        Numo::NArray.srand(12_324_124)
         subject.random!
       end
 
@@ -162,20 +163,11 @@ describe TspKit::Nodes::CostMatrix do
         dr = subject.to_distance_rank(7)
         expect(dr).to be_a TspKit::DistanceRank
 
-        expect(dr.closest_nodes).to be_narray_like(
-          NArray[
-            [7, 5, 6, 3, 2, 9, 4],
-            [6, 5, 4, 3, 8, 7, 0],
-            [5, 0, 7, 8, 4, 6, 3],
-            [4, 8, 5, 0, 1, 7, 6],
-            [3, 9, 1, 5, 7, 0, 2],
-            [3, 2, 0, 7, 6, 1, 8],
-            [1, 9, 5, 7, 0, 3, 4],
-            [0, 5, 6, 9, 2, 3, 4],
-            [3, 5, 1, 2, 0, 9, 7],
-            [6, 4, 7, 0, 5, 8, 2]
-          ]
-        )
+        10.times do |node_id|
+          expected = (0...10).reject { |id| id == node_id }
+                            .sort_by { |id| subject.weights[node_id, id] }.first(7)
+          expect(dr.closest_nodes[node_id, true].to_a).to eql expected
+        end
       end
     end
   end

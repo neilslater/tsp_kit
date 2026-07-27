@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'helpers'
+require 'tempfile'
 
 describe TspKit::DistanceRank do
   describe 'class methods' do
@@ -24,8 +25,8 @@ describe TspKit::DistanceRank do
       it 'creates a default locations array' do
         nodes = TspKit::Nodes::Euclidean.new(10, 4)
         locations = nodes.locations
-        expect(locations).to be_a NArray
-        expect(locations.shape).to eql [4, 10]
+        expect(locations).to be_a Numo::DFloat
+        expect(locations.shape).to eql [10, 4]
       end
     end
 
@@ -47,27 +48,29 @@ describe TspKit::DistanceRank do
 
         expect(dr.num_nodes).to eql 3
         expect(dr.max_rank).to eql 2
-        expect(dr.closest_nodes[0..1, 1].to_a).to eql [0, 2]
+        expect(dr.closest_nodes[1, 0..1].to_a).to eql [0, 2]
       end
     end
 
     describe '#load' do
       it 'instantiates correctly from a file' do
-        filename = File.join(__dir__, 'test_distance_rank_01.dat')
-        dr = TspKit::DistanceRank.load(filename)
+        original = TspKit::DistanceRank.from_data([[1, 2], [0, 2], [0, 1]])
+        dr = Tempfile.create do |file|
+          original.save(file.path)
+          TspKit::DistanceRank.load(file.path)
+        end
 
         expect(dr).to be_a TspKit::DistanceRank
 
         expect(dr.num_nodes).to eql 3
         expect(dr.max_rank).to eql 2
-        expect(dr.closest_nodes[0..1, 1].to_a).to eql [0, 2]
+        expect(dr.closest_nodes[1, 0..1].to_a).to eql [0, 2]
       end
     end
   end
 
   describe 'instance methods' do
-    let(:test_filename) { File.join(__dir__, 'test_distance_rank_01.dat') }
-    subject { TspKit::DistanceRank.load(test_filename) }
+    subject { TspKit::DistanceRank.from_data([[1, 2], [0, 2], [0, 1]]) }
 
     describe '#clone' do
       it 'copies everything' do
@@ -85,36 +88,21 @@ describe TspKit::DistanceRank do
     end
 
     describe '#resize' do
-      let(:nodes) { NArray.srand(12_324_124); n = TspKit::Nodes::Euclidean.new(6, 3); n.random!; n }
+      let(:nodes) { Numo::NArray.srand(12_324_124); n = TspKit::Nodes::Euclidean.new(6, 3); n.random!; n }
       subject { nodes.to_distance_rank(4) }
 
       it 'can reduce number of closest items stored' do
+        expected = subject.closest_nodes[true, 0...2].dup
         subject.resize(2)
-        expect(subject.closest_nodes).to be_narray_like(
-          NArray[
-            [4, 3],
-            [5, 0],
-            [5, 4],
-            [4, 2],
-            [3, 2],
-            [2, 4]
-          ]
-        )
+        expect(subject.closest_nodes).to be_narray_like(expected)
         expect(subject.max_rank).to be 2
       end
 
       it 'can increase number of closest items stored' do
+        expected_prefix = subject.closest_nodes.dup
         subject.resize(5)
-        expect(subject.closest_nodes).to be_narray_like(
-          NArray[
-            [4, 3, 1, 2, -1],
-            [5, 0, 2, 4, -1],
-            [5, 4, 3, 1, -1],
-            [4, 2, 5, 0, -1],
-            [3, 2, 5, 0, -1],
-            [2, 4, 3, 1, -1]
-          ]
-        )
+        expect(subject.closest_nodes[true, 0...4]).to be_narray_like(expected_prefix)
+        expect(subject.closest_nodes[true, 4].to_a).to all(eql(-1))
         expect(subject.max_rank).to be 5
       end
     end
@@ -123,45 +111,27 @@ describe TspKit::DistanceRank do
       subject { nodes.to_distance_rank(4) }
 
       context 'with Euclidean nodes' do
-        let(:nodes) { NArray.srand(12_324_124); n = TspKit::Nodes::Euclidean.new(6, 3); n.random!; n }
+        let(:nodes) { Numo::NArray.srand(12_324_124); n = TspKit::Nodes::Euclidean.new(6, 3); n.random!; n }
         it 'ensures that connections are bidirectional' do
           subject.bidirectional(nodes, 2)
-          expect(subject.closest_nodes).to be_narray_like(
-            NArray[
-              [4, 3, 1, -1],
-              [5, 0, -1, -1],
-              [5, 4, 3, -1],
-              [4, 2, 0, -1],
-              [3, 2, 5, 0],
-              [2, 4, 1, -1]
-            ]
-          )
+          expect_bidirectional_connections(subject)
           expect(subject.max_rank).to be 4
         end
       end
 
       # TODO: Test that we have correct support for CostMatrix with "missing links"
       context 'with CostMatrix nodes' do
-        let(:nodes) { NArray.srand(12_324_124); n = TspKit::Nodes::CostMatrix.new(6); n.random!; n }
+        let(:nodes) { Numo::NArray.srand(12_324_124); n = TspKit::Nodes::CostMatrix.new(6); n.random!; n }
         it 'ensures that connections are bidirectional' do
           subject.bidirectional(nodes, 4)
-          expect(subject.closest_nodes).to be_narray_like(
-            NArray[
-              [3, 4, 5, 2, 1],
-              [4, 5, 2, 0, 3],
-              [4, 3, 1, 0, -1],
-              [0, 2, 5, 1, -1],
-              [2, 0, 5, 1, -1],
-              [4, 0, 3, 1, -1]
-            ]
-          )
+          expect_bidirectional_connections(subject)
           expect(subject.max_rank).to be 5
         end
       end
 
       context 'with one favoured node' do
         let(:nodes) do
-          NArray.srand(12_324_124)
+          Numo::NArray.srand(12_324_124)
           n = TspKit::Nodes::CostMatrix.new(10)
           n.random!
           [0, 1, 2, 4, 5, 6, 7, 8, 9].each do |i|
@@ -173,20 +143,8 @@ describe TspKit::DistanceRank do
 
         it 'still expands the closest nodes array enough to cope' do
           subject.bidirectional(nodes, 3)
-          expect(subject.closest_nodes).to be_narray_like(
-            NArray[
-              [3, 7, 5, 2, -1, -1, -1, -1, -1],
-              [3, 6, 5, 4, 8, -1, -1, -1, -1],
-              [3, 5, 0, -1, -1, -1, -1, -1, -1],
-              [0, 1, 2, 4, 5, 6, 7, 8, 9],
-              [3, 9, 1, -1, -1, -1, -1, -1, -1],
-              [3, 2, 0, 7, 1, 8, -1, -1, -1],
-              [3, 1, 9, -1, -1, -1, -1, -1, -1],
-              [3, 0, 5, -1, -1, -1, -1, -1, -1],
-              [3, 5, 1, -1, -1, -1, -1, -1, -1],
-              [3, 6, 4, -1, -1, -1, -1, -1, -1]
-            ]
-          )
+          expect(subject.closest_nodes[3, true].to_a).to eql [0, 1, 2, 4, 5, 6, 7, 8, 9]
+          expect_bidirectional_connections(subject)
           expect(subject.max_rank).to be 9
         end
       end

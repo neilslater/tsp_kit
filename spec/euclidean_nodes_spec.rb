@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'helpers'
+require 'tempfile'
 
 describe TspKit::Nodes::Euclidean do
   describe 'class methods' do
@@ -24,8 +25,8 @@ describe TspKit::Nodes::Euclidean do
       it 'creates a default locations array' do
         nodes = TspKit::Nodes::Euclidean.new(10, 4)
         locations = nodes.locations
-        expect(locations).to be_a NArray
-        expect(locations.shape).to eql [4, 10]
+        expect(locations).to be_a Numo::DFloat
+        expect(locations.shape).to eql [10, 4]
       end
     end
 
@@ -53,21 +54,23 @@ describe TspKit::Nodes::Euclidean do
 
     describe '#load' do
       it 'instantiates correctly from a file' do
-        filename = File.join(__dir__, 'test_euclidean_nodes_01.dat')
-        nodes = TspKit::Nodes::Euclidean.load(filename)
+        original = TspKit::Nodes::Euclidean.from_data([[1, 2], [25, 15], [0, 0]])
+        nodes = Tempfile.create do |file|
+          original.save(file.path)
+          TspKit::Nodes::Euclidean.load(file.path)
+        end
 
         expect(nodes).to be_a TspKit::Nodes::Euclidean
 
         expect(nodes.num_nodes).to eql 3
         expect(nodes.num_dims).to eql 2
-        expect(nodes.locations[0..1, 1].to_a).to eql [25.0, 15.0]
+        expect(nodes.locations[1, 0..1].to_a).to eql [25.0, 15.0]
       end
     end
   end
 
   describe 'instance methods' do
-    let(:test_filename) { File.join(__dir__, 'test_euclidean_nodes_01.dat') }
-    subject { TspKit::Nodes::Euclidean.load(test_filename) }
+    subject { TspKit::Nodes::Euclidean.from_data([[1, 2], [25, 15], [0, 0]]) }
 
     describe '#clone' do
       it 'copies everything' do
@@ -88,7 +91,7 @@ describe TspKit::Nodes::Euclidean do
       subject { TspKit::Nodes::Euclidean.new(10, 2) }
 
       before :each do
-        NArray.srand(12_324_124)
+        Numo::NArray.srand(12_324_124)
         subject.random!
       end
 
@@ -102,7 +105,7 @@ describe TspKit::Nodes::Euclidean do
         it "matches distances calculated in Ruby for #{dim}D locations" do
           nodes = TspKit::Nodes::Euclidean.new(10, dim)
           [*0..4].zip([*5..9]).each do |a_id, b_id|
-            delta = nodes.locations[0..(dim - 1), a_id] - nodes.locations[0..(dim - 1), b_id]
+              delta = nodes.locations[a_id, 0..(dim - 1)] - nodes.locations[b_id, 0..(dim - 1)]
             expected_distance = Math.sqrt((delta * delta).sum)
             expect(nodes.distance_between(a_id, b_id)).to be_within(1e-8).of expected_distance
           end
@@ -124,18 +127,13 @@ describe TspKit::Nodes::Euclidean do
       subject { TspKit::Nodes::Euclidean.new(10, 2) }
 
       before :each do
-        NArray.srand(12_324_124)
+        Numo::NArray.srand(12_324_124)
         subject.random!
       end
 
-      it 'returns a NArray of distances from a given node' do
-        expect(subject.all_distances_from(0)).to be_narray_like(
-          NArray[
-            0.0, 77.28642341028714, 68.9759365641762, 69.55714952267627,
-            35.18914125546472, 40.87693450724964, 55.88324450929859, 56.25268255054893,
-            38.69583237198266, 8.719792467772585
-          ]
-        )
+      it 'returns a Numo::DFloat of distances from a given node' do
+        expected = Numo::NMath.sqrt(((subject.locations - subject.locations[0, true])**2).sum(axis: 1))
+        expect(subject.all_distances_from(0)).to be_narray_like(expected)
       end
     end
 
@@ -143,7 +141,7 @@ describe TspKit::Nodes::Euclidean do
       subject { TspKit::Nodes::Euclidean.new(6, 3) }
 
       before :each do
-        NArray.srand(12_324_124)
+        Numo::NArray.srand(12_324_124)
         subject.random!
       end
 
@@ -151,16 +149,12 @@ describe TspKit::Nodes::Euclidean do
         cm = subject.to_cost_matrix
         expect(cm).to be_a TspKit::Nodes::CostMatrix
 
-        expect(cm.weights).to be_narray_like(
-          NArray[
-            [0.000000, 65.414892, 69.636629, 59.594620, 59.034899, 73.764380],
-            [65.414892, 0.000000, 68.040486, 89.214107, 86.305504, 55.552064],
-            [69.636629, 68.040487, 0.000000, 36.701962, 32.230178, 17.755599],
-            [59.594620, 89.214107, 36.701962, 0.000000, 6.8591116, 52.892410],
-            [59.034899, 86.305504, 32.230178, 6.8591116, 0.000000, 48.747318],
-            [73.764380, 55.552064, 17.755599, 52.892410, 48.747318, 0.000000]
-          ]
-        )
+        expect(cm.weights).to be_narray_like(cm.weights.transpose)
+        6.times do |from|
+          6.times do |to|
+            expect(cm.weights[from, to]).to be_within(1e-9).of(subject.distance_between(from, to))
+          end
+        end
       end
     end
 
@@ -168,7 +162,7 @@ describe TspKit::Nodes::Euclidean do
       subject { TspKit::Nodes::Euclidean.new(6, 3) }
 
       before :each do
-        NArray.srand(12_324_124)
+        Numo::NArray.srand(12_324_124)
         subject.random!
       end
 
@@ -176,16 +170,11 @@ describe TspKit::Nodes::Euclidean do
         dr = subject.to_distance_rank(4)
         expect(dr).to be_a TspKit::DistanceRank
 
-        expect(dr.closest_nodes).to be_narray_like(
-          NArray[
-            [4, 3, 1, 2],
-            [5, 0, 2, 4],
-            [5, 4, 3, 1],
-            [4, 2, 5, 0],
-            [3, 2, 5, 0],
-            [2, 4, 3, 1]
-          ]
-        )
+        6.times do |node_id|
+          expected = (0...6).reject { |id| id == node_id }
+                           .sort_by { |id| subject.distance_between(node_id, id) }.first(4)
+          expect(dr.closest_nodes[node_id, true].to_a).to eql expected
+        end
       end
     end
   end

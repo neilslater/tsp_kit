@@ -22,7 +22,6 @@ Solution *solution__create() {
 
 void solution__init( Solution *solution, int num_nodes ) {
   int i;
-  struct NARRAY *narr;
   int32_t *narr_ids_ptr;
   int32_t *narr_node_idx_ptr;
 
@@ -30,23 +29,21 @@ void solution__init( Solution *solution, int num_nodes ) {
 
   solution->ids_shape = ALLOC_N( int, 1 );
   solution->ids_shape[0] = num_nodes;
-  solution->narr_ids = na_make_object( NA_LINT, 1, solution->ids_shape, cNArray );
-  GetNArray( solution->narr_ids, narr );
-  narr_ids_ptr = (int32_t*) narr->ptr;
-  for( i = 0; i < narr->total; i++ ) {
+  solution->narr_ids = tsp_numo_new(numo_cInt32, 1, solution->ids_shape);
+  narr_ids_ptr = (int32_t *)tsp_numo_write_pointer(solution->narr_ids);
+  for( i = 0; i < num_nodes; i++ ) {
     narr_ids_ptr[i] = 0;
   }
-  solution->ids = (int32_t *) narr->ptr;
+  solution->ids = narr_ids_ptr;
 
   solution->node_idx_shape = ALLOC_N( int, 1 );
   solution->node_idx_shape[0] = num_nodes;
-  solution->narr_node_idx = na_make_object( NA_LINT, 1, solution->node_idx_shape, cNArray );
-  GetNArray( solution->narr_node_idx, narr );
-  narr_node_idx_ptr = (int32_t*) narr->ptr;
-  for( i = 0; i < narr->total; i++ ) {
+  solution->narr_node_idx = tsp_numo_new(numo_cInt32, 1, solution->node_idx_shape);
+  narr_node_idx_ptr = (int32_t *)tsp_numo_write_pointer(solution->narr_node_idx);
+  for( i = 0; i < num_nodes; i++ ) {
     narr_node_idx_ptr[i] = 0;
   }
-  solution->node_idx = (int32_t *) narr->ptr;
+  solution->node_idx = narr_node_idx_ptr;
 
   return;
 }
@@ -59,25 +56,27 @@ void solution__destroy( Solution *solution ) {
 }
 
 void solution__gc_mark( Solution *solution ) {
-  rb_gc_mark( solution->narr_ids );
-  rb_gc_mark( solution->narr_node_idx );
+  rb_gc_mark_movable(solution->narr_ids);
+  rb_gc_mark_movable(solution->narr_node_idx);
+  return;
+}
+
+void solution__gc_compact(Solution *solution) {
+  solution->narr_ids = rb_gc_location(solution->narr_ids);
+  solution->narr_node_idx = rb_gc_location(solution->narr_node_idx);
   return;
 }
 
 void solution__deep_copy( Solution *solution_copy, Solution *solution_orig ) {
-  struct NARRAY *narr;
-
   solution_copy->num_nodes = solution_orig->num_nodes;
 
-  solution_copy->narr_ids = na_clone( solution_orig->narr_ids );
-  GetNArray( solution_copy->narr_ids, narr );
-  solution_copy->ids = (int32_t *) narr->ptr;
+  solution_copy->narr_ids = tsp_numo_clone(solution_orig->narr_ids);
+  solution_copy->ids = (int32_t *)tsp_numo_read_write_pointer(solution_copy->narr_ids);
   solution_copy->ids_shape = ALLOC_N( int, 1 );
   memcpy( solution_copy->ids_shape, solution_orig->ids_shape, 1 * sizeof(int) );
 
-  solution_copy->narr_node_idx = na_clone( solution_orig->narr_node_idx );
-  GetNArray( solution_copy->narr_node_idx, narr );
-  solution_copy->node_idx = (int32_t *) narr->ptr;
+  solution_copy->narr_node_idx = tsp_numo_clone(solution_orig->narr_node_idx);
+  solution_copy->node_idx = (int32_t *)tsp_numo_read_write_pointer(solution_copy->narr_node_idx);
   solution_copy->node_idx_shape = ALLOC_N( int, 1 );
   memcpy( solution_copy->node_idx_shape, solution_orig->node_idx_shape, 1 * sizeof(int) );
 

@@ -55,36 +55,44 @@ static VALUE rbmodule__randn_float( VALUE self ) {
 
 /* @overload shuffle_narray( narray )
  * @!visibility private
- * Use the random number generator to shuffle some integers in a NArray
- * @return [NArray] original NArray
+ * Use the random number generator to shuffle a Numo::Int32 array.
+ * @return [Numo::Int32] original array
  */
 static VALUE rbmodule__shuffle_narray( VALUE self, VALUE rv_narray ) {
-  struct NARRAY *narr;
-  GetNArray( rv_narray, narr );
-
-  // TODO: Raise error if NArray is wrong type
-
-  shuffle_ints( narr->total, (int *) narr->ptr );
+  narray_t *narr;
+  narr = tsp_numo_metadata(rv_narray);
+  if (!rb_obj_is_kind_of(rv_narray, numo_cInt32)) {
+    rb_raise(rb_eTypeError, "expected Numo::Int32");
+  }
+  shuffle_ints((int)narr->size, (int *)tsp_numo_read_write_pointer(rv_narray));
   return rv_narray;
 }
 
 /* @overload quicksort_a_by_b( narray_a, narray_b )
  * @!visibility private
  * Test quicksort_by
- * @return [NArray] original NArray
+ * @return [Numo::Int32] original array
  */
 static VALUE rbmodule__quicksort_a_by_b( VALUE self, VALUE rv_narray_a, VALUE rv_narray_b ) {
-  struct NARRAY *narr_a;
-  struct NARRAY *narr_b;
+  narray_t *narr_a;
+  narray_t *narr_b;
 
-  GetNArray( rv_narray_a, narr_a );
-  GetNArray( rv_narray_b, narr_b );
+  narr_a = tsp_numo_metadata(rv_narray_a);
+  narr_b = tsp_numo_metadata(rv_narray_b);
 
-  // TODO: Raise error if either NArray is wrong type or different size, or if a has ids outside of b
-  if ( narr_b->total != narr_a->total ) {
+  if (!rb_obj_is_kind_of(rv_narray_a, numo_cInt32)) {
+    rb_raise(rb_eTypeError, "first array must be Numo::Int32");
+  }
+  if (!rb_obj_is_kind_of(rv_narray_b, numo_cDFloat)) {
+    rb_raise(rb_eTypeError, "second array must be Numo::DFloat");
+  }
+  if ( narr_b->size != narr_a->size ) {
     rb_raise( rb_eArgError, "arrays must be same size" );
   }
-  quicksort_ids_by_double( (int *) narr_a->ptr, (double *) narr_b->ptr, 0, narr_b->total - 1 );
+  quicksort_ids_by_double(
+    (int *)tsp_numo_read_write_pointer(rv_narray_a),
+    (double *)tsp_numo_read_pointer(rv_narray_b), 0, (int)narr_b->size - 1
+  );
 
   return rv_narray_a;
 }
@@ -92,15 +100,18 @@ static VALUE rbmodule__quicksort_a_by_b( VALUE self, VALUE rv_narray_a, VALUE rv
 /* @overload quicksort_ints( narray )
  * @!visibility private
  * Test quicksort
- * @return [NArray] original NArray
+ * @return [Numo::Int32] original array
  */
 static VALUE rbmodule__quicksort_ints( VALUE self, VALUE rv_narray ) {
-  struct NARRAY *narr;
+  narray_t *narr;
 
-  GetNArray( rv_narray, narr );
-
-  // TODO: Raise error if NArray is wrong type
-  quicksort_ints( (int *) narr->ptr, 0, narr->total - 1 );
+  narr = tsp_numo_metadata(rv_narray);
+  if (!rb_obj_is_kind_of(rv_narray, numo_cInt32)) {
+    rb_raise(rb_eTypeError, "expected Numo::Int32");
+  }
+  quicksort_ints(
+    (int *)tsp_numo_read_write_pointer(rv_narray), 0, (int)narr->size - 1
+  );
 
   return rv_narray;
 }

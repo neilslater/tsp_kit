@@ -41,7 +41,7 @@ module TspKit
         nodes = TspKit::Nodes::Euclidean.new(dimension, 2)
         locations = nodes.locations
         dimension.times do |i|
-          locations[0..1, i] = node_coords[i + 1]
+          locations[i, 0..1] = node_coords[i + 1]
         end
         nodes
       end
@@ -120,7 +120,7 @@ module TspKit
       def self.file_to_tsplib_hash(file_path)
         parser = Parser.new
         tsplib_hash = {}
-        File.open(file_path, 'r').each_line do |line|
+        ::File.open(file_path, 'r').each_line do |line|
           parser.add_line(line.chomp, tsplib_hash)
         end
         tsplib_hash

@@ -4,7 +4,7 @@
 #define RUBY_CLASS_DISTANCE_RANK_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 #include "struct_distance_rank.h"
 #include "shared_vars.h"
 

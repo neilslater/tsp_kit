@@ -9,7 +9,7 @@
 #define CORE_NARRAY_H
 
 #include <ruby.h>
-#include "narray.h"
+#include "numo_helpers.h"
 
 // This is copied from na_array.c, with safety checks and temp vars removed
 int na_quick_idxs_to_pos( int rank, int *shape, int *idxs );

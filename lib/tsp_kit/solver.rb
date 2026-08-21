@@ -4,7 +4,7 @@ module TspKit
   # Base interface for solver implementations.
   class Solver
     def initialize(opts = {})
-      set_opts(opts)
+      configure(opts)
     end
 
     def run
@@ -19,7 +19,7 @@ module TspKit
 
     private
 
-    def set_opts(opts)
+    def configure(opts)
       @opts = self.class.default_opts.merge(opts)
     end
   end

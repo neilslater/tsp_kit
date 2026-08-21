@@ -25,6 +25,7 @@ describe TspKit::File::TspLib do
 
     it 'rejects unsupported edge weight types' do
       attributes = valid_attributes.merge('EDGE_WEIGHT_TYPE' => 'GEO')
+
       expect { described_class.new(attributes) }.to raise_error(ArgumentError)
     end
   end
@@ -33,7 +34,6 @@ describe TspKit::File::TspLib do
     it 'ignores comments and EOF markers' do
       parsed = {}
       parser = described_class.new
-
       parser.add_line('# comment', parsed)
       parser.add_line('EOF', parsed)
 
@@ -43,44 +43,42 @@ describe TspKit::File::TspLib do
 
   describe '.read_file' do
     context "with 'a280.tsp'" do
-      subject { described_class.read_file(path) }
+      subject(:problem) { described_class.read_file(path) }
 
-      let(:path) { File.join(__dir__, '..', 'data', 'a280.tsp') }
+      let(:path) { File.expand_path('../../../data/a280.tsp', __dir__) }
 
       it 'reads headers correctly' do
-        expect(subject.name).to eql 'a280'
-        expect(subject.comment).to eql 'drilling problem (Ludwig)'
-        expect(subject.type).to eql 'TSP'
-        expect(subject.dimension).to be 280
-        expect(subject.edge_weight_type).to eql 'EUC_2D'
+        expect(problem).to have_attributes(
+          name: 'a280', comment: 'drilling problem (Ludwig)', type: 'TSP',
+          dimension: 280, edge_weight_type: 'EUC_2D'
+        )
       end
 
       it 'converts node data correctly' do
-        locations = subject.get_nodes.locations
-        expect(locations.shape).to eql [280, 2]
-        expect(locations[0, true].to_a).to eql [288.0, 149.0]
-        expect(locations[-1, true].to_a).to eql [280.0, 133.0]
+        locations = problem.get_nodes.locations
+
+        expect([locations.shape, locations[0, true].to_a, locations[-1, true].to_a])
+          .to eql [[280, 2], [288.0, 149.0], [280.0, 133.0]]
       end
     end
 
     context "with 'ch130.tsp'" do
-      subject { described_class.read_file(path) }
+      subject(:problem) { described_class.read_file(path) }
 
-      let(:path) { File.join(__dir__, '..', 'data', 'ch130.tsp') }
+      let(:path) { File.expand_path('../../../data/ch130.tsp', __dir__) }
 
       it 'reads headers correctly' do
-        expect(subject.name).to eql 'ch130'
-        expect(subject.comment).to eql '130 city problem (Churritz)'
-        expect(subject.type).to eql 'TSP'
-        expect(subject.dimension).to be 130
-        expect(subject.edge_weight_type).to eql 'EUC_2D'
+        expect(problem).to have_attributes(
+          name: 'ch130', comment: '130 city problem (Churritz)', type: 'TSP',
+          dimension: 130, edge_weight_type: 'EUC_2D'
+        )
       end
 
       it 'converts node data correctly' do
-        locations = subject.get_nodes.locations
-        expect(locations.shape).to eql [130, 2]
-        expect(locations[0, true].to_a).to eql [334.5909245845, 161.7809319139]
-        expect(locations[-1, true].to_a).to eql [403.2874386776, 205.8971749407]
+        locations = problem.get_nodes.locations
+
+        expect([locations.shape, locations[0, true].to_a, locations[-1, true].to_a])
+          .to eql [[130, 2], [334.5909245845, 161.7809319139], [403.2874386776, 205.8971749407]]
       end
     end
   end

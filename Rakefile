@@ -18,13 +18,13 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), 'lib')
 
 desc 'Unit tests'
 RSpec::Core::RakeTask.new(:test) do |t|
-  t.pattern = 'spec/*_spec.rb'
+  t.pattern = 'spec/**/*_spec.rb'
   t.verbose = true
 end
 
 desc 'Run specs with enforced line and branch coverage'
 RSpec::Core::RakeTask.new(:coverage) do |t|
-  t.pattern = 'spec/*_spec.rb'
+  t.pattern = 'spec/**/*_spec.rb'
   t.rspec_opts = ['--require', File.expand_path('spec/coverage_helper.rb', __dir__)]
 end
 Rake::Task[:coverage].enhance([:compile])
@@ -61,7 +61,6 @@ gcc_compiler = lambda do |task_name|
 end
 
 # The native tasks keep their platform checks and build orchestration together.
-# rubocop:disable Metrics/BlockLength
 namespace :c do
   desc 'Compile the C extension with strict warnings'
   task :lint do
@@ -112,7 +111,6 @@ namespace :c do
     )
   end
 end
-# rubocop:enable Metrics/BlockLength
 
 Rake::ExtensionTask.new('tsp_kit', gemspec) do |ext|
   ext.source_pattern = '*.{c,h}'

@@ -2,5 +2,6 @@
 
 require 'csv'
 
+# Native data structures and algorithms for travelling salesman problems.
 module TspKit
 end

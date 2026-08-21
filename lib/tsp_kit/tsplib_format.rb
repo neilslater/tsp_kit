@@ -3,11 +3,6 @@
 module TspKit
   # Parsers and adapters for external file formats.
   module File
-  end
-end
-
-module TspKit
-  module File
     # A supported TSPLIB problem definition.
     class TspLib
       attr_reader :name, :comment, :type, :dimension, :edge_weight_type, :node_coords
@@ -35,9 +30,12 @@ module TspKit
 
       # Converts the parsed problem to TspKit nodes.
       # @return [TspKit::Nodes::Euclidean]
-      def get_nodes
+      def nodes
         generate_nodes_euc_2d
       end
+
+      # Backward-compatible name for {#nodes}.
+      alias get_nodes nodes
 
       private
 
@@ -90,37 +88,42 @@ module TspKit
 
         # Adds one source line to a parsed attribute hash.
         # @param text [String] source line
-        # @param hash [Hash] accumulated attributes
+        # @param attributes [Hash] accumulated attributes
         # @return [void]
-        def add_line(text, hash)
+        def add_line(text, attributes)
           text = text.strip
+          return if ignored_line?(text)
+          return start_section(text) if SECTION_STARTS.include?(text)
 
-          # Allow comments (not sure if part of TspLib spec?)
-          return if text.start_with?('#')
-          return if text.upcase == 'EOF'
-
-          # New section starts?
-          if SECTION_STARTS.include?(text)
-            @section = text.downcase.to_sym
-            return
-          end
-
-          if @section == :headers
-            parse_header_line(text, hash)
-          else
-            parse_node_coord_line(text, hash)
-          end
+          parse_line(text, attributes)
         end
 
         private
 
-        def parse_header_line(text, hash)
-          hname, hval = text.split(/\s*:\s*/, 2)
-          hash[hname] = hval
+        def ignored_line?(text)
+          text.start_with?('#') || text.casecmp?('EOF')
         end
 
-        def parse_node_coord_line(text, hash)
-          nc = (hash['NODE_COORDS'] ||= {})
+        def start_section(text)
+          @section = text.downcase.to_sym
+          nil
+        end
+
+        def parse_line(text, attributes)
+          if @section == :headers
+            parse_header_line(text, attributes)
+          else
+            parse_node_coord_line(text, attributes)
+          end
+        end
+
+        def parse_header_line(text, attributes)
+          hname, hval = text.split(/\s*:\s*/, 2)
+          attributes[hname] = hval
+        end
+
+        def parse_node_coord_line(text, attributes)
+          nc = (attributes['NODE_COORDS'] ||= {})
           vals = text.strip.split(/\s+/)
           id = vals.shift.to_i
           nc[id] = vals.map(&:to_f)

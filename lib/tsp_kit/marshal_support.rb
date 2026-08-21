@@ -46,10 +46,9 @@ module TspKit
       end
     end
   end
-end
 
-module TspKit
   class Nodes
+    # Marshal persistence for Euclidean node collections.
     class Euclidean
       include TspKit::MarshalSupport
 
@@ -67,11 +66,8 @@ module TspKit
         TspKit::Nodes::Euclidean.from_data(attributes[:locations])
       end
     end
-  end
-end
 
-module TspKit
-  class Nodes
+    # Marshal persistence for cost-matrix node collections.
     class CostMatrix
       include TspKit::MarshalSupport
 
@@ -90,9 +86,8 @@ module TspKit
       end
     end
   end
-end
 
-module TspKit
+  # Marshal persistence for nearest-neighbour indexes.
   class DistanceRank
     include TspKit::MarshalSupport
 

@@ -18,6 +18,7 @@ typedef struct _priority_queue_raw {
 
   double *priorities;
   int *payloads;
+  unsigned char *states; // Unseen, queued, or settled; never encoded in priorities.
 
   int *heap_leftmost_child;
   int *heap_parent;
@@ -43,6 +44,8 @@ void priority_queue__deep_copy( PriorityQueue *pq_copy, PriorityQueue *pq_orig )
 
 PriorityQueue * priority_queue__clone( PriorityQueue *pq_orig );
 
+// Validates IDs and finite keys before access, including calls from native tree code.
+// Settled IDs and larger keys are ignored; equal keys replace the payload.
 void priority_queue__push( PriorityQueue *pq, int id, double priority, int payload );
 
 int priority_queue__pop( PriorityQueue *pq );

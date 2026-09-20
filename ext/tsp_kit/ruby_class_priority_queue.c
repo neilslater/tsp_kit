@@ -4,7 +4,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Ruby bindings for training data arrays - the deeper implementation is in
+//  Ruby bindings for the single-pass Prim queue - the deeper implementation is in
 //  struct_priority_queue.c
 //
 
@@ -41,13 +41,13 @@ void assert_value_wraps_priority_queue( VALUE obj ) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Network method definitions
+//  Queue method definitions
 //
 
 /* @overload initialize( pq_size )
- * Creates a new ...
- * @param [Integer] pq_size ...
- * @return [TspKit::PriorityQueue] new ...
+ * Creates an empty single-pass queue with positive capacity.
+ * @param [Integer] pq_size positive capacity representable as a C int
+ * @return [TspKit::Utils::PriorityQueue] new queue
  */
 VALUE priority_queue_rbobject__initialize( VALUE self, VALUE rv_pq_size ) {
   PriorityQueue *priority_queue = get_priority_queue_struct( self );
@@ -75,7 +75,7 @@ VALUE priority_queue_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
 }
 
 /* @!attribute [r] pq_size
- * Description goes here
+ * Fixed queue capacity
  * @return [Integer]
  */
 VALUE priority_queue_rbobject__get_pq_size( VALUE self ) {
@@ -84,7 +84,7 @@ VALUE priority_queue_rbobject__get_pq_size( VALUE self ) {
 }
 
 /* @!attribute [r] heap_root
- * Description goes here
+ * Minimum-priority ID, or -1 when empty
  * @return [Integer]
  */
 VALUE priority_queue_rbobject__get_heap_root( VALUE self ) {
@@ -95,11 +95,13 @@ VALUE priority_queue_rbobject__get_heap_root( VALUE self ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-/* @overload push( id, priority )
- * Adds prioritised element, or re-prioritises existing element
- * @param [Integer] id ...
- * @param [Float] priority ...
- * @return [Santa2018::PriorityQueue] self
+/* @overload push( id, priority, payload )
+ * Inserts an unseen ID or decreases its key; equal keys replace payloads.
+ * Larger keys and settled IDs are ignored. Equal priorities use smaller IDs first.
+ * @param [Integer] id identifier in 0...pq_size
+ * @param [Float] priority finite key
+ * @param [Integer] payload associated C int value
+ * @return [TspKit::Utils::PriorityQueue] self
  */
 VALUE priority_queue_rbobject__push( VALUE self, VALUE rv_id, VALUE rv_priority, VALUE rv_payload  ) {
   PriorityQueue *priority_queue = get_priority_queue_struct( self );
@@ -135,7 +137,7 @@ VALUE priority_queue_rbobject__peek_priority( VALUE self ) {
 }
 
 /* @overload peek_payload( )
- * Returns payoad of highest-priority element, but does not remove it from the queue
+ * Returns payload of highest-priority element, but does not remove it from the queue
  * @return [Float]
  */
 VALUE priority_queue_rbobject__peek_payload( VALUE self ) {

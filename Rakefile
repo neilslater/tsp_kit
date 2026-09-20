@@ -99,6 +99,7 @@ namespace :c do
     sh(
       {
         'ASAN_OPTIONS' => 'detect_leaks=0',
+        'UBSAN_OPTIONS' => 'halt_on_error=1:print_stacktrace=1',
         'TSP_KIT_DISABLE_SIMPLECOV' => '1',
         'LD_PRELOAD' => libasan
       },
@@ -106,8 +107,9 @@ namespace :c do
       '-S',
       'bundle',
       'exec',
-      'rake',
-      'test'
+      'rspec',
+      '--pattern',
+      'spec/**/*_spec.rb'
     )
   end
 end

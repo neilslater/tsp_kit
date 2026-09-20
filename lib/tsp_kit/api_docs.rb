@@ -140,24 +140,40 @@ module TspKit
   #
   #   # Internal utility data structures.
   #   module Utils
-  #     # Fixed-capacity native priority queue keyed by integer identifiers.
+  #     # Fixed-capacity indexed queue for a single Prim pass.
+  #     # Smaller priorities come first, with equal priorities ordered by smaller ID.
+  #     # Popped IDs remain settled for the lifetime of this queue; create a new
+  #     # queue for another pass. Clone and dup copy all states independently.
   #     class PriorityQueue
   #       # @!method initialize(size)
-  #       #   Creates an empty queue with fixed capacity.
+  #       #   Creates an empty queue with positive capacity representable as a C int.
+  #       #   Storage is O(size); allocation sizes must fit size_t.
+  #       #   @param size [Integer] fixed capacity
+  #       #   @raise [ArgumentError] if capacity is not positive or already initialized
+  #       #   @raise [RangeError] if capacity exceeds the native size limits
   #       # @!attribute [r] pq_size
   #       #   @return [Integer]
   #       # @!attribute [r] heap_root
   #       #   @return [Integer]
   #       # @!method push(id, priority, payload)
+  #       #   Inserts an unseen ID or decreases its queued priority. An equal
+  #       #   priority replaces the payload; larger keys and settled IDs are ignored.
+  #       #   All arguments are validated before mutation, even for settled IDs.
+  #       #   @param id [Integer] identifier in 0...pq_size
+  #       #   @param priority [Float] any finite double, including negative costs
+  #       #   @param payload [Integer] associated value representable as a C int
+  #       #   @raise [ArgumentError] if the ID is out of bounds or priority is not finite
+  #       #   @raise [RangeError] if an integer exceeds the C int range
   #       #   @return [PriorityQueue] self
   #       # @!method pop
-  #       #   @return [Integer] highest-priority identifier
+  #       #   @return [Integer] minimum-priority identifier, or -1 when empty
   #       # @!method peek
-  #       #   @return [Integer] highest-priority identifier
+  #       #   @return [Integer] minimum-priority identifier, or -1 when empty
   #       # @!method peek_priority
-  #       #   @return [Float]
+  #       #   Use peek == -1 to test emptiness: -Float::MAX is also a valid key.
+  #       #   @return [Float] minimum priority, or -Float::MAX when empty
   #       # @!method peek_payload
-  #       #   @return [Integer]
+  #       #   @return [Integer] minimum entry payload, or -1 when empty
   #     end
   #   end
 end
